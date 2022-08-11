@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_8)
 #ifdef HAVE_ROUND
 
-elemental function _gfortran_specific__anint_r8 (parm)
+elemental function _lfortran_specific__anint_r8 (parm)
    real (kind=8), intent (in) :: parm
-   real (kind=8) :: _gfortran_specific__anint_r8
+   real (kind=8) :: _lfortran_specific__anint_r8
 
-   _gfortran_specific__anint_r8 = anint (parm)
+   _lfortran_specific__anint_r8 = anint (parm)
 end function
 
 #endif

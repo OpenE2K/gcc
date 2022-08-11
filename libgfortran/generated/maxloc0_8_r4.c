@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 #if defined (HAVE_GFC_REAL_4) && defined (HAVE_GFC_INTEGER_8)
@@ -60,8 +60,7 @@ maxloc0_8_r4 (gfc_array_i8 * const restrict retarray,
   else
     {
       if (unlikely (compile_options.bounds_check))
-	bounds_iforeach_return ((array_t *) retarray, (array_t *) array,
-				"MAXLOC");
+	bounds_iforeach_return ((array_t *) retarray, (array_t *) array, "MAXLOC");
     }
 
   dstride = GFC_DESCRIPTOR_STRIDE(retarray,0);
@@ -203,10 +202,8 @@ mmaxloc0_8_r4 (gfc_array_i8 * const restrict retarray,
       if (unlikely (compile_options.bounds_check))
 	{
 
-	  bounds_iforeach_return ((array_t *) retarray, (array_t *) array,
-				  "MAXLOC");
-	  bounds_equal_extents ((array_t *) mask, (array_t *) array,
-				  "MASK argument", "MAXLOC");
+	  bounds_iforeach_return ((array_t *) retarray, (array_t *) array, "MAXLOC");
+	  bounds_equal_extents ((array_t *) mask, (array_t *) array, _("MASK argument"), "MAXLOC");
 	}
     }
 
@@ -368,8 +365,7 @@ smaxloc0_8_r4 (gfc_array_i8 * const restrict retarray,
     }
   else if (unlikely (compile_options.bounds_check))
     {
-       bounds_iforeach_return ((array_t *) retarray, (array_t *) array,
-			       "MAXLOC");
+       bounds_iforeach_return ((array_t *) retarray, (array_t *) array, "MAXLOC");
     }
 
   dstride = GFC_DESCRIPTOR_STRIDE(retarray,0);

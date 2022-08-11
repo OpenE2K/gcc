@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 /* Prototypes.  */
 
@@ -55,11 +55,8 @@ enum { IEEE_OTHER_VALUE = 0, IEEE_SIGNALING_NAN, IEEE_QUIET_NAN,
 #define CLASSMACRO(TYPE) \
   int ieee_class_helper_ ## TYPE (GFC_REAL_ ## TYPE *value) \
   { \
-    int res = __builtin_fpclassify (IEEE_QUIET_NAN, IEEE_POSITIVE_INF, \
-				    IEEE_POSITIVE_NORMAL, \
-				    IEEE_POSITIVE_DENORMAL, \
-				    IEEE_POSITIVE_ZERO, *value); \
- \
+    int res = __builtin_fpclassify (IEEE_QUIET_NAN, IEEE_POSITIVE_INF, IEEE_POSITIVE_NORMAL, IEEE_POSITIVE_DENORMAL, IEEE_POSITIVE_ZERO, *value); \
+    \
     if (__builtin_signbit (*value)) \
     { \
       if (res == IEEE_POSITIVE_NORMAL) \
@@ -105,14 +102,58 @@ CLASSMACRO(16)
 void ieee_procedure_entry (void *);
 export_proto(ieee_procedure_entry);
 
+/**
+ * Надо ли поддерживать работу с fp-exceptions
+ * см. #125603, #125856
+ */
+static int
+ieee_is_needed_fp_exceptions( void)
+{
+#ifdef __e2k__
+ /* В архитектуре "Эльбрус" если обнулить биты особых ситуаций
+  * регистра %pfpfr и впоследствии возникнет вещественная спекулятивная
+  * операция, при исполнении которой будет особая ситуация, то на
+  * выходе этой операции будет диагностическое значение. И при использовании
+  * данного диагностического операнда произойдет падение. Таким образом,
+  * программы, корректно работающие на x86, sparc, будут падать на e2k( mcstbug #125603.15)
+  *
+  * Для того, чтобы учесть данную особенность архитектуры "Эльбрус", решили
+  * обнуление битов особых ситуация делать только в том случае, если установлена
+  * переменная окружения MCST_E2K_SUPPORT_FFE_EXCEPTIONS.
+  * Таким образом, корректная работа на e2k с процедурами фортрановского
+  * модуля ieee_exceptions будет возможна только при установленной переменной
+  * окружения MCST_E2K_SUPPORT_FFE_EXCEPTIONS.
+  * см. mcstbug #125603.52, mcstbug #125603.72
+  *
+  * Решили, что по умолчанию переменная окружения MCST_E2K_SUPPORT_FFE_EXCEPTIONS
+  * не будет установлена => по умолчанию обнуление битов особых ситуаций реистра %pfpfr
+  * производится не будет( mcstbug #125603.72)
+  */
+  static int is_needed = -1;
+
+  if ( is_needed != - 1 )
+      return is_needed;
+
+  is_needed = ( getenv( "MCST_E2K_SUPPORT_FFE_EXCEPTIONS") == NULL ) ? 0 : 1;
+
+  return is_needed;
+#else /* __e2k__ */
+  /* На всех остальных архитектурах поддерживаем работу с fp-exceptions */
+  return 1;
+#endif /* __e2k__ */
+} /* ieee_is_needed_fp_exceptions */
+
 void
 ieee_procedure_entry (void *state)
 {
   /* Save the floating-point state in the space provided by the caller.  */
   get_fpu_state (state);
 
-  /* Clear the floating-point exceptions.  */
-  set_fpu_except_flags (0, GFC_FPE_ALL);
+  if ( ieee_is_needed_fp_exceptions( ) )
+  {
+      /* Clear the floating-point exceptions.  */
+      set_fpu_except_flags (0, GFC_FPE_ALL);
+  }
 }
 
 
@@ -128,7 +169,10 @@ ieee_procedure_exit (void *state)
   /* Restore the floating-point state we had on entry.  */
   set_fpu_state (state);
 
-  /* And re-raised the flags that were raised since entry.  */
-  set_fpu_except_flags (flags, 0);
+  if ( ieee_is_needed_fp_exceptions( ) )
+  {
+      /* And re-raised the flags that were raised since entry.  */
+      set_fpu_except_flags (flags, 0);
+  }
 }
 

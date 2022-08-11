@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_8)
 
 
-elemental function _gfortran_specific__aimag_c8 (parm)
+elemental function _lfortran_specific__aimag_c8 (parm)
    complex (kind=8), intent (in) :: parm
-   real (kind=8) :: _gfortran_specific__aimag_c8
+   real (kind=8) :: _lfortran_specific__aimag_c8
 
-   _gfortran_specific__aimag_c8 = aimag (parm)
+   _lfortran_specific__aimag_c8 = aimag (parm)
 end function
 
 

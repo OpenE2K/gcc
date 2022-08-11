@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 #if defined (HAVE_GFC_INTEGER_4) && defined (HAVE_GFC_INTEGER_16)
@@ -60,8 +60,7 @@ minloc0_16_i4 (gfc_array_i16 * const restrict retarray,
   else
     {
       if (unlikely (compile_options.bounds_check))
-	bounds_iforeach_return ((array_t *) retarray, (array_t *) array,
-				"MINLOC");
+	bounds_iforeach_return ((array_t *) retarray, (array_t *) array, "MINLOC");
     }
 
   dstride = GFC_DESCRIPTOR_STRIDE(retarray,0);
@@ -203,10 +202,8 @@ mminloc0_16_i4 (gfc_array_i16 * const restrict retarray,
       if (unlikely (compile_options.bounds_check))
 	{
 
-	  bounds_iforeach_return ((array_t *) retarray, (array_t *) array,
-				  "MINLOC");
-	  bounds_equal_extents ((array_t *) mask, (array_t *) array,
-				  "MASK argument", "MINLOC");
+	  bounds_iforeach_return ((array_t *) retarray, (array_t *) array, "MINLOC");
+	  bounds_equal_extents ((array_t *) mask, (array_t *) array, _("MASK argument"), "MINLOC");
 	}
     }
 
@@ -368,8 +365,7 @@ sminloc0_16_i4 (gfc_array_i16 * const restrict retarray,
     }
   else if (unlikely (compile_options.bounds_check))
     {
-       bounds_iforeach_return ((array_t *) retarray, (array_t *) array,
-			       "MINLOC");
+       bounds_iforeach_return ((array_t *) retarray, (array_t *) array, "MINLOC");
     }
 
   dstride = GFC_DESCRIPTOR_STRIDE(retarray,0);

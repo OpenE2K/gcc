@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 #if defined (HAVE_GFC_INTEGER_8)
@@ -97,7 +97,7 @@ count_8_l (gfc_array_i8 * const restrict retarray,
         }
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -113,10 +113,8 @@ count_8_l (gfc_array_i8 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " COUNT intrinsic: is %ld, should be %ld",
-		       (long int) GFC_DESCRIPTOR_RANK (retarray),
-		       (long int) rank);
+		runtime_error ("rank of return array incorrect in COUNT intrinsic: is %ld, should be %ld",
+		       (long int) GFC_DESCRIPTOR_RANK (retarray), (long int) rank);
 
       if (unlikely (compile_options.bounds_check))
 	{
@@ -126,10 +124,8 @@ count_8_l (gfc_array_i8 * const restrict retarray,
 
 	      ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,n);
 	      if (extent[n] != ret_extent)
-		runtime_error ("Incorrect extent in return value of"
-			       " COUNT intrinsic in dimension %d:"
-			       " is %ld, should be %ld", (int) n + 1,
-			       (long int) ret_extent, (long int) extent[n]);
+			runtime_error ("Incorrect extent in return value of COUNT intrinsic in dimension %d: is %ld, should be %ld", 
+				(int) n + 1, (long int) ret_extent, (long int) extent[n]);
 	    }
 	}
     }

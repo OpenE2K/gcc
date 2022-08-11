@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 
@@ -96,7 +96,7 @@ norm2_r4 (gfc_array_r4 * const restrict retarray,
 	}
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -112,14 +112,12 @@ norm2_r4 (gfc_array_r4 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " NORM intrinsic: is %ld, should be %ld",
+	runtime_error ("rank of return array incorrect in NORM intrinsic: is %ld, should be %ld",
 		       (long int) (GFC_DESCRIPTOR_RANK (retarray)),
 		       (long int) rank);
 
       if (unlikely (compile_options.bounds_check))
-	bounds_ifunction_return ((array_t *) retarray, extent,
-				 "return value", "NORM");
+	bounds_ifunction_return ((array_t *) retarray, extent, _("return value"), "NORM");
     }
 
   for (n = 0; n < rank; n++)

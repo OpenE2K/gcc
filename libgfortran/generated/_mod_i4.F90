@@ -34,11 +34,11 @@
 
 
 
-elemental function _gfortran_specific__mod_i4 (p1, p2)
+elemental function _lfortran_specific__mod_i4 (p1, p2)
    integer (kind=4), intent (in) :: p1, p2
-   integer (kind=4) :: _gfortran_specific__mod_i4
+   integer (kind=4) :: _lfortran_specific__mod_i4
 
-   _gfortran_specific__mod_i4 = mod (p1, p2)
+   _lfortran_specific__mod_i4 = mod (p1, p2)
 end function
 
 

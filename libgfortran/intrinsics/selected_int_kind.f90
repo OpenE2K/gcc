@@ -22,10 +22,10 @@
 !see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 !<http://www.gnu.org/licenses/>.
 
-function _gfortran_selected_int_kind (r)
+function _lfortran_selected_int_kind (r)
   implicit none
   integer, intent (in) :: r
-  integer :: _gfortran_selected_int_kind
+  integer :: _lfortran_selected_int_kind
   integer :: i
   ! Integer kind_range table
   type :: int_info
@@ -37,10 +37,10 @@ function _gfortran_selected_int_kind (r)
 
   do i = 1, c
     if (r <= int_infos (i) % range) then
-      _gfortran_selected_int_kind = int_infos (i) % kind
+      _lfortran_selected_int_kind = int_infos (i) % kind
       return
     end if
   end do
-  _gfortran_selected_int_kind = -1
+  _lfortran_selected_int_kind = -1
   return
 end function

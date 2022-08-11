@@ -24,7 +24,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 
@@ -126,19 +126,16 @@ spread_i4 (gfc_array_i4 *ret, const gfc_array_i4 *source,
 		  rdelta = GFC_DESCRIPTOR_STRIDE(ret,n);
 
 		  if (ret_extent != ncopies)
-		    runtime_error("Incorrect extent in return value of SPREAD"
-				  " intrinsic in dimension %ld: is %ld,"
-				  " should be %ld", (long int) n+1,
-				  (long int) ret_extent, (long int) ncopies);
+		    runtime_error("Incorrect extent in return value of SPREAD intrinsic in dimension %ld: is %ld, should be %ld",
+			      (long int) n+1, (long int) ret_extent, (long int) ncopies);
 		}
 	      else
 		{
 		  count[dim] = 0;
 		  extent[dim] = GFC_DESCRIPTOR_EXTENT(source,dim);
 		  if (ret_extent != extent[dim])
-		    runtime_error("Incorrect extent in return value of SPREAD"
-				  " intrinsic in dimension %ld: is %ld,"
-				  " should be %ld", (long int) n+1,
+		    runtime_error("Incorrect extent in return value of SPREAD intrinsic in dimension %ld: is %ld, should be %ld",
+			      (long int) n+1,
 				  (long int) ret_extent,
 				  (long int) extent[dim]);
 		    

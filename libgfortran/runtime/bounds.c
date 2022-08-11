@@ -22,7 +22,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <assert.h>
 
 /* Auxiliary functions for bounds checking, mostly to reduce library size.  */
@@ -41,15 +41,12 @@ bounds_iforeach_return (array_t *retarray, array_t *array, const char *name)
   ret_rank = GFC_DESCRIPTOR_RANK (retarray);
 
   if (ret_rank != 1)
-    runtime_error ("Incorrect rank of return array in %s intrinsic:"
-		   "is %ld, should be 1", name, (long int) ret_rank);
+    runtime_error ("Incorrect rank of return array in %s intrinsic:is %ld, should be 1", name, (long int) ret_rank);
 
   rank = GFC_DESCRIPTOR_RANK (array);
   ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,0);
   if (ret_extent != rank)
-    runtime_error ("Incorrect extent in return value of"
-		   " %s intrinsic: is %ld, should be %ld",
-		   name, (long int) ret_extent, (long int) rank);
+    runtime_error ("Incorrect extent in return value of %s intrinsic: is %ld, should be %ld", name, (long int) ret_extent, (long int) rank);
 
 }
 
@@ -79,27 +76,21 @@ bounds_ifunction_return (array_t * a, const index_type * extent,
   if (empty)
     {
       if (a_size != 0)
-	runtime_error ("Incorrect size in %s of %s"
-		       " intrinsic: should be zero-sized",
-		       a_name, intrinsic);
+	runtime_error ("Incorrect size in %s of %s intrinsic: should be zero-sized", a_name, intrinsic);
     }
   else
     {
       if (a_size == 0)
-	runtime_error ("Incorrect size of %s in %s"
-		       " intrinsic: should not be zero-sized",
-		       a_name, intrinsic);
+	runtime_error ("Incorrect size of %s in %s intrinsic: should not be zero-sized", a_name, intrinsic);
 
       for (n = 0; n < rank; n++)
 	{
 	  index_type a_extent;
 	  a_extent = GFC_DESCRIPTOR_EXTENT(a, n);
-	  if (a_extent != extent[n])
-	    runtime_error("Incorrect extent in %s of %s"
-			  " intrinsic in dimension %ld: is %ld,"
-			  " should be %ld", a_name, intrinsic, (long int) n + 1,
-			  (long int) a_extent, (long int) extent[n]);
 
+	  if (a_extent != extent[n])
+	    runtime_error("Incorrect extent in %s of %s intrinsic in dimension %ld: is %ld, should be %ld",
+			a_name, intrinsic, (long int) n + 1, (long int) a_extent, (long int) extent[n]);
 	}
     }
 }
@@ -122,16 +113,12 @@ bounds_equal_extents (array_t *a, array_t *b, const char *a_name,
   if (b_size == 0)
     {
       if (a_size != 0)
-	runtime_error ("Incorrect size of %s in %s"
-		       " intrinsic: should be zero-sized",
-		       a_name, intrinsic);
+	runtime_error ("Incorrect size of %s in %s intrinsic: should be zero-sized", a_name, intrinsic);
     }
   else
     {
       if (a_size == 0) 
-	runtime_error ("Incorrect size of %s of %s"
-		       " intrinsic: Should not be zero-sized",
-		       a_name, intrinsic);
+	runtime_error ("Incorrect size of %s of %s intrinsic: Should not be zero-sized", a_name, intrinsic);
 
       for (n = 0; n < GFC_DESCRIPTOR_RANK (b); n++)
 	{
@@ -140,10 +127,8 @@ bounds_equal_extents (array_t *a, array_t *b, const char *a_name,
 	  a_extent = GFC_DESCRIPTOR_EXTENT(a, n);
 	  b_extent = GFC_DESCRIPTOR_EXTENT(b, n);
 	  if (a_extent != b_extent)
-	    runtime_error("Incorrect extent in %s of %s"
-			  " intrinsic in dimension %ld: is %ld,"
-			  " should be %ld", a_name, intrinsic, (long int) n + 1,
-			  (long int) a_extent, (long int) b_extent);
+	    runtime_error("Incorrect extent in %s of %s intrinsic in dimension %ld: is %ld, should be %ld",
+			a_name, intrinsic, (long int) n + 1, (long int) a_extent, (long int) b_extent);
 	}
     }
 }
@@ -166,16 +151,12 @@ bounds_reduced_extents (array_t *a, array_t *b, int which, const char *a_name,
   if (b_size == 0)
     {
       if (a_size != 0)
-	runtime_error ("Incorrect size in %s of %s"
-		       " intrinsic: should not be zero-sized",
-		       a_name, intrinsic);
+	runtime_error ("Incorrect size in %s of %s intrinsic: should not be zero-sized", a_name, intrinsic);
     }
   else
     {
       if (a_size == 0) 
-	runtime_error ("Incorrect size of %s of %s"
-		       " intrinsic: should be zero-sized",
-		       a_name, intrinsic);
+	runtime_error ("Incorrect size of %s of %s intrinsic: should be zero-sized", a_name, intrinsic);
 
       i = 0;
       for (n = 0; n < GFC_DESCRIPTOR_RANK (b); n++)
@@ -187,10 +168,8 @@ bounds_reduced_extents (array_t *a, array_t *b, int which, const char *a_name,
 	      a_extent = GFC_DESCRIPTOR_EXTENT(a, i);
 	      b_extent = GFC_DESCRIPTOR_EXTENT(b, n);
 	      if (a_extent != b_extent)
-		runtime_error("Incorrect extent in %s of %s"
-			      " intrinsic in dimension %ld: is %ld,"
-			      " should be %ld", a_name, intrinsic, (long int) i + 1,
-			      (long int) a_extent, (long int) b_extent);
+		runtime_error("Incorrect extent in %s of %s intrinsic in dimension %ld: is %ld, should be %ld",
+			a_name, intrinsic, (long int) i + 1, (long int) a_extent, (long int) b_extent);
 	      i++;
 	    }
 	}

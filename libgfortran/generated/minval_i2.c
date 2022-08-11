@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 #if defined (HAVE_GFC_INTEGER_2) && defined (HAVE_GFC_INTEGER_2)
@@ -93,7 +93,7 @@ minval_i2 (gfc_array_i2 * const restrict retarray,
 	}
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -109,14 +109,12 @@ minval_i2 (gfc_array_i2 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " MINVAL intrinsic: is %ld, should be %ld",
-		       (long int) (GFC_DESCRIPTOR_RANK (retarray)),
+		runtime_error ("rank of return array incorrect in MINVAL intrinsic: is %ld, should be %ld",
+		(long int) (GFC_DESCRIPTOR_RANK (retarray)),
 		       (long int) rank);
 
       if (unlikely (compile_options.bounds_check))
-	bounds_ifunction_return ((array_t *) retarray, extent,
-				 "return value", "MINVAL");
+	bounds_ifunction_return ((array_t *) retarray, extent, _("return value"), "MINVAL");
     }
 
   for (n = 0; n < rank; n++)
@@ -286,7 +284,7 @@ mminval_i2 (gfc_array_i2 * const restrict retarray,
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       if (alloc_size == 0)
 	{
@@ -305,10 +303,8 @@ mminval_i2 (gfc_array_i2 * const restrict retarray,
 
       if (unlikely (compile_options.bounds_check))
 	{
-	  bounds_ifunction_return ((array_t *) retarray, extent,
-				   "return value", "MINVAL");
-	  bounds_equal_extents ((array_t *) mask, (array_t *) array,
-	  			"MASK argument", "MINVAL");
+	  bounds_ifunction_return ((array_t *) retarray, extent, _("return value"), "MINVAL");
+	  bounds_equal_extents ((array_t *) mask, (array_t *) array, _("MASK argument"), "MINVAL");
 	}
     }
 
@@ -466,7 +462,7 @@ sminval_i2 (gfc_array_i2 * const restrict retarray,
 	}
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -482,9 +478,8 @@ sminval_i2 (gfc_array_i2 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " MINVAL intrinsic: is %ld, should be %ld",
-		       (long int) (GFC_DESCRIPTOR_RANK (retarray)),
+	runtime_error ("rank of return array incorrect in MINVAL intrinsic: is %ld, should be %ld",
+	(long int) (GFC_DESCRIPTOR_RANK (retarray)),
 		       (long int) rank);
 
       if (unlikely (compile_options.bounds_check))
@@ -495,10 +490,8 @@ sminval_i2 (gfc_array_i2 * const restrict retarray,
 
 	      ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,n);
 	      if (extent[n] != ret_extent)
-		runtime_error ("Incorrect extent in return value of"
-			       " MINVAL intrinsic in dimension %ld:"
-			       " is %ld, should be %ld", (long int) n + 1,
-			       (long int) ret_extent, (long int) extent[n]);
+		runtime_error ("Incorrect extent in return value of MINVAL intrinsic in dimension %ld: is %ld, should be %ld",
+		           (long int) n + 1, (long int) ret_extent, (long int) extent[n]);
 	    }
 	}
     }

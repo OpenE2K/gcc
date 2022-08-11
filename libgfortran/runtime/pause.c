@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 #ifdef HAVE_UNISTD_H
@@ -35,8 +35,7 @@ static void
 do_pause (void)
 {
   char buff[4];
-  estr_write ("To resume execution, type go.  "
-	      "Other input will terminate the job.\n");
+  estr_write ("To resume execution, type go. Other input will terminate the job.\n");
 
   fgets(buff, 4, stdin);
   if (strncmp(buff, "go\n", 3) != 0)

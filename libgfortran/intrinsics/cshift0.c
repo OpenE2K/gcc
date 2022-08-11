@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 static void
@@ -144,12 +144,14 @@ cshift0 (gfc_array_char * ret, const gfc_array_char * array,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_REAL_16
     case GFC_DTYPE_REAL_16:
       cshift0_r16 ((gfc_array_r16 *)ret, (gfc_array_r16 *) array, shift,
 		   which);
       return;
 # endif
+#endif
 #endif
 
     case GFC_DTYPE_COMPLEX_4:
@@ -174,12 +176,14 @@ cshift0 (gfc_array_char * ret, const gfc_array_char * array,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_COMPLEX_16
     case GFC_DTYPE_COMPLEX_16:
       cshift0_c16 ((gfc_array_c16 *)ret, (gfc_array_c16 *) array, shift,
 		   which);
       return;
 # endif
+#endif
 #endif
 
     default:

@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 
@@ -98,14 +98,12 @@ cshift1 (gfc_array_char * const restrict ret,
     }
   else if (unlikely (compile_options.bounds_check))
     {
-      bounds_equal_extents ((array_t *) ret, (array_t *) array,
-				 "return value", "CSHIFT");
+      bounds_equal_extents ((array_t *) ret, (array_t *) array, _("return value"), "CSHIFT");
     }
 
   if (unlikely (compile_options.bounds_check))
     {
-      bounds_reduced_extents ((array_t *) h, (array_t *) array, which,
-      			      "SHIFT argument", "CSHIFT");
+      bounds_reduced_extents ((array_t *) h, (array_t *) array, which, _("SHIFT argument"), "CSHIFT");
     }
 
   if (arraysize == 0)

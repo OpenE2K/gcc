@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_10)
 #ifdef HAVE_CABSL
 
-elemental function _gfortran_specific__abs_c10 (parm)
+elemental function _lfortran_specific__abs_c10 (parm)
    complex (kind=10), intent (in) :: parm
-   real (kind=10) :: _gfortran_specific__abs_c10
+   real (kind=10) :: _lfortran_specific__abs_c10
 
-   _gfortran_specific__abs_c10 = abs (parm)
+   _lfortran_specific__abs_c10 = abs (parm)
 end function
 
 #endif

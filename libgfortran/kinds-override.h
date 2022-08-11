@@ -35,12 +35,28 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 
 #if defined(HAVE_GFC_REAL_16)
 # if defined(HAVE_GFC_REAL_10)
-#  define GFC_REAL_16_IS_FLOAT128
-#  if !defined(HAVE_FLOAT128)
-#   error "Where has __float128 gone?"
+#  if defined(HAVE_FLOAT128)
+#    define GFC_REAL_16_IS_FLOAT128
+#  else
+#    define GFC_REAL_16_IS_LONG_DOUBLE
 #  endif
 # else
 #  define GFC_REAL_16_IS_LONG_DOUBLE
 # endif
 #endif
 
+#define GFC_REAL_4_HUGE 3.40282347e38f
+#define GFC_REAL_4_DIGITS 24
+#define GFC_REAL_4_RADIX 2
+
+#define GFC_REAL_8_HUGE 1.7976931348623157e308
+#define GFC_REAL_8_DIGITS 53
+#define GFC_REAL_8_RADIX 2
+
+#define GFC_REAL_10_HUGE 1.18973149535723176502e4932l
+#define GFC_REAL_10_DIGITS 64
+#define GFC_REAL_10_RADIX 2
+
+#define GFC_REAL_16_HUGE 1.18973149535723176508575932662800702e4932q
+#define GFC_REAL_16_DIGITS 113
+#define GFC_REAL_16_RADIX 2

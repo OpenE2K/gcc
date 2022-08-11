@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 #include <assert.h>
 
@@ -199,9 +199,8 @@ date_and_time (char *__date, char *__time, char *__zone,
 	delta = 1;
       
       if (unlikely (len < VALUES_SIZE))
-	  runtime_error ("Incorrect extent in VALUE argument to"
-			 " DATE_AND_TIME intrinsic: is %ld, should"
-			 " be >=%ld", (long int) len, (long int) VALUES_SIZE);
+	  runtime_error ("Incorrect extent in VALUE argument to DATE_AND_TIME intrinsic: is %ld, should be >=%ld", 
+	     (long int) len, (long int) VALUES_SIZE);
 
       /* Cope with different type kinds.  */
       if (elt_size == 4)

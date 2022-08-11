@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 static void
@@ -125,19 +125,16 @@ spread_internal (gfc_array_char *ret, const gfc_array_char *source,
 		  rdelta = GFC_DESCRIPTOR_STRIDE_BYTES(ret,n);
 
 		  if (ret_extent != ncopies)
-		    runtime_error("Incorrect extent in return value of SPREAD"
-				  " intrinsic in dimension %ld: is %ld,"
-				  " should be %ld", (long int) n+1,
-				  (long int) ret_extent, (long int) ncopies);
+		    runtime_error("Incorrect extent in return value of SPREAD intrinsic in dimension %ld: is %ld, should be %ld",
+			      (long int) n+1, (long int) ret_extent, (long int) ncopies);
 		}
 	      else
 		{
 		  count[dim] = 0;
 		  extent[dim] = GFC_DESCRIPTOR_EXTENT(source,dim);
 		  if (ret_extent != extent[dim])
-		    runtime_error("Incorrect extent in return value of SPREAD"
-				  " intrinsic in dimension %ld: is %ld,"
-				  " should be %ld", (long int) n+1,
+		    runtime_error("Incorrect extent in return value of SPREAD intrinsic in dimension %ld: is %ld, should be %ld",
+			      (long int) n+1,
 				  (long int) ret_extent,
 				  (long int) extent[dim]);
 		    
@@ -331,11 +328,13 @@ spread (gfc_array_char *ret, const gfc_array_char *source,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef GFC_HAVE_REAL_16
     case GFC_DTYPE_REAL_16:
       spread_r16 ((gfc_array_r16 *) ret, (gfc_array_r16 *) source,
 		 *along, *pncopies);
       return;
+# endif
 # endif
 #endif
 
@@ -363,11 +362,13 @@ spread (gfc_array_char *ret, const gfc_array_char *source,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef GFC_HAVE_COMPLEX_16
     case GFC_DTYPE_COMPLEX_16:
       spread_c16 ((gfc_array_c16 *) ret, (gfc_array_c16 *) source,
 		 *along, *pncopies);
       return;
+# endif
 # endif
 #endif
 
@@ -527,11 +528,13 @@ spread_scalar (gfc_array_char *ret, const char *source,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_REAL_16
     case GFC_DTYPE_REAL_16:
       spread_scalar_r16 ((gfc_array_r16 *) ret, (GFC_REAL_16 *) source,
 			*along, *pncopies);
       return;
+# endif
 # endif
 #endif
 
@@ -559,11 +562,13 @@ spread_scalar (gfc_array_char *ret, const char *source,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_COMPLEX_16
     case GFC_DTYPE_COMPLEX_16:
       spread_scalar_c16 ((gfc_array_c16 *) ret, (GFC_COMPLEX_16 *) source,
 			*along, *pncopies);
       return;
+# endif
 # endif
 #endif
 

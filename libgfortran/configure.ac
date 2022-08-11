@@ -2,7 +2,7 @@
 # aclocal && autoconf && autoheader && automake
 
 AC_PREREQ(2.64)
-AC_INIT([GNU Fortran Runtime Library], 0.3,,[libgfortran])
+AC_INIT([GNU Fortran Runtime Library], 0.3,,[liblfortran])
 AC_CONFIG_HEADER(config.h)
 GCC_TOPLEV_SUBDIRS
 
@@ -70,55 +70,15 @@ AC_SUBST(target_alias)
 AM_INIT_AUTOMAKE([1.9.6 no-define foreign no-dist -Wall -Wno-portability])
 
 AM_MAINTAINER_MODE
-AM_ENABLE_MULTILIB(, ..)
 
-# Handy for debugging:
-#AC_MSG_NOTICE($build / $host / $target / $host_alias / $target_alias); sleep 5
+toolexecdir='$(libdir)'
+toolexeclibdir='$(toolexecdir)'
 
-# Are we being configured with some form of cross compiler?
-# NB: We don't actually need to know this just now, but when, say, a test
-#     suite is included, we'll have to know.
-if test "$build" != "$host"; then
-  LIBGFOR_IS_NATIVE=false
-  GCC_NO_EXECUTABLES
-else
-  LIBGFOR_IS_NATIVE=true
-fi
-
-AC_USE_SYSTEM_EXTENSIONS
-
-# Calculate toolexeclibdir
-# Also toolexecdir, though it's only used in toolexeclibdir
-case ${version_specific_libs} in
-  yes)
-    # Need the gcc compiler version to know where to install libraries
-    # and header files if --enable-version-specific-runtime-libs option
-    # is selected.
-    toolexecdir='$(libdir)/gcc/$(target_alias)'
-    toolexeclibdir='$(toolexecdir)/$(gcc_version)$(MULTISUBDIR)'
-    ;;
-  no)
-    if test -n "$with_cross_host" &&
-       test x"$with_cross_host" != x"no"; then
-      # Install a library built with a cross compiler in tooldir, not libdir.
-      toolexecdir='$(exec_prefix)/$(target_alias)'
-      toolexeclibdir='$(toolexecdir)/lib'
-    else
-      toolexecdir='$(libdir)/gcc-lib/$(target_alias)'
-      toolexeclibdir='$(libdir)'
-    fi
-    multi_os_directory=`$CC -print-multi-os-directory`
-    case $multi_os_directory in
-      .) ;; # Avoid trailing /.
-      *) toolexeclibdir=$toolexeclibdir/$multi_os_directory ;;
-    esac
-    ;;
-esac
 AC_SUBST(toolexecdir)
 AC_SUBST(toolexeclibdir)
 
 # Create a spec file, so that compile/link tests don't fail
-test -f libgfortran.spec || touch libgfortran.spec
+test -f liblfortran.spec || touch liblfortran.spec
 
 AC_LANG_C
 # Check the compiler.
@@ -138,14 +98,26 @@ AM_PROG_CC_C_O
 
 # Add -Wall -fno-repack-arrays -fno-underscoring if we are using GCC.
 if test "x$GCC" = "xyes"; then
-  AM_FCFLAGS="-I . -Wall -Werror -fimplicit-none -fno-repack-arrays -fno-underscoring"
+  AM_FCFLAGS="-I. -I${srcdir} -Wall -Werror -fimplicit-none"
+  stdf=
+  case "${FORTRAN}" in
+    *gfortran*)
+	  AM_FCFLAGS="$AM_FCFLAGS -fno-underscoring -Wno-unused-dummy-argument -Wno-c-binding-type -fallow-leading-underscore"
+	  stdf="-std=gnu99"
+##	  stdf="-std=gnu11"
+      ;;
+	*)
+      AM_FCFLAGS="$AM_FCFLAGS -Wf,-fno-underscoring  -Wf,-fallow-leading-underscore  -Wf,-Wno-unused-dummy-argument -Wf,-Wno-c-binding-type"
+	  stdf="-std=gnu99"
+      ;;
+  esac
   ## We like to use C11 and C99 routines when available.  This makes
   ## sure that
   ## __STDC_VERSION__ is set such that libc includes make them available.
-  AM_CFLAGS="-std=gnu11 -Wall -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition -Wextra -Wwrite-strings -Werror=implicit-function-declaration -Werror=vla"
+  AM_CFLAGS="$stdf -Wall -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition -Wextra -Wwrite-strings -Werror=implicit-function-declaration -Wno-unknown-pragmas"
   ## Compile the following tests with the same system header contents
   ## that we'll encounter when compiling our own source files.
-  CFLAGS="-std=gnu11 $CFLAGS"
+  CFLAGS="$stdf $CFLAGS"
 fi
 AC_SUBST(AM_FCFLAGS)
 AC_SUBST(AM_CFLAGS)
@@ -155,7 +127,7 @@ AC_SUBST(CFLAGS)
 AC_MSG_CHECKING([whether symbol versioning is supported])
 AC_ARG_ENABLE(symvers,
 AS_HELP_STRING([--disable-symvers],
-  [disable symbol versioning for libgfortran]),
+  [disable symbol versioning for liblfortran]),
 gfortran_use_symver=$enableval,
 gfortran_use_symver=yes)
 if test "x$gfortran_use_symver" != xno; then
@@ -184,11 +156,6 @@ EOF
   fi
   LDFLAGS="$save_LDFLAGS"
 fi
-AC_MSG_RESULT($gfortran_use_symver)
-AM_CONDITIONAL(LIBGFOR_USE_SYMVER, [test "x$gfortran_use_symver" != xno])
-AM_CONDITIONAL(LIBGFOR_USE_SYMVER_GNU, [test "x$gfortran_use_symver" = xgnu])
-AM_CONDITIONAL(LIBGFOR_USE_SYMVER_SUN, [test "x$gfortran_use_symver" = xsun])
-
 # For GPU offloading, not everything in libfortran can be supported.
 # Currently, the only target that has this problem is nvptx.  The
 # following is a (partial) list of features that are unsupportable on
@@ -222,9 +189,6 @@ fi
 AC_MSG_RESULT($ac_fdsections)
 AC_SUBST(SECTION_FLAGS)
 
-# Check linker hardware capability support.
-GCC_CHECK_LINKER_HWCAP
-
 # Find other programs we need.
 AC_CHECK_TOOL(AS, as)
 AC_CHECK_TOOL(AR, ar)
@@ -236,24 +200,13 @@ AC_PROG_INSTALL
 #AC_MSG_NOTICE([====== Starting libtool configuration])
 AC_LIBTOOL_DLOPEN
 AM_PROG_LIBTOOL
-ACX_LT_HOST_FLAGS
 AC_SUBST(enable_shared)
 AC_SUBST(enable_static)
 #AC_MSG_NOTICE([====== Finished libtool configuration]) ; sleep 10
 
-# We need gfortran to compile parts of the library
-#AC_PROG_FC(gfortran)
-FC="$GFORTRAN"
+# We need fortran to compile parts of the library
+FC="$FORTRAN"
 AC_PROG_FC(gfortran)
-
-# extra LD Flags which are required for targets
-case "${host}" in
-  *-darwin*)
-    # Darwin needs -single_module when linking libgfortran
-    extra_ldflags_libgfortran=-Wl,-single_module
-    ;;
-esac
-AC_SUBST(extra_ldflags_libgfortran)
 
 # We need a working compiler at that point, otherwise give a clear
 # error message and bail out.
@@ -525,7 +478,7 @@ AC_CHECK_LIB([m],[feenableexcept],[have_feenableexcept=yes AC_DEFINE([HAVE_FEENA
 # At least for glibc, clock_gettime is in librt.  But don't
 # pull that in if it still doesn't give us the function we want.  This
 # test is copied from libgomp, and modified to not link in -lrt as
-# libgfortran calls clock_gettime via a weak reference if it's found
+# liblfortran calls clock_gettime via a weak reference if it's found
 # in librt.
 if test "$ac_cv_func_clock_gettime" = no; then
   AC_CHECK_LIB(rt, clock_gettime,
@@ -616,7 +569,7 @@ LIBGFOR_CHECK_UNLINK_OPEN_FILE
 LIBGFOR_CHECK_CRLF
 
 # Check whether we support AVX extensions
-LIBGFOR_CHECK_AVX
+## LIBGFOR_CHECK_AVX
 
 # Check wether we support AVX2 extensions
 LIBGFOR_CHECK_AVX2
@@ -638,6 +591,6 @@ fi
 # Write our Makefile and spec file.
 AC_CONFIG_FILES([
 Makefile
-libgfortran.spec
+liblfortran.spec
 ])
 AC_OUTPUT

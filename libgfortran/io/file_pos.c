@@ -97,7 +97,7 @@ formatted_backspace (st_parameter_filepos *fpp, gfc_unit *u)
 static void
 unformatted_backspace (st_parameter_filepos *fpp, gfc_unit *u)
 {
-  gfc_offset m, slen;
+  gfc_offset m = 0, slen;
   GFC_INTEGER_4 m4;
   GFC_INTEGER_8 m8;
   ssize_t length;
@@ -372,7 +372,7 @@ st_endfile (st_parameter_filepos *fpp)
 	  if (u == NULL)
 	    return;
 	  u->endfile = AFTER_ENDFILE;
-	  u->last_char = EOF - 1;
+      u->last_char = EOF - 1;
 	}
     }
 
@@ -432,7 +432,7 @@ st_rewind (st_parameter_filepos *fpp)
 	  u->current_record = 0;
 	  u->strm_pos = 1;
 	  u->read_bad = 0;
-	  u->last_char = EOF - 1;
+      u->last_char = EOF - 1;
 	}
       /* Update position for INQUIRE.  */
       u->flags.position = POSITION_REWIND;

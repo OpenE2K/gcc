@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 /* PACK is specified as follows:
@@ -136,6 +136,11 @@ pack_internal (gfc_array_char *ret, const gfc_array_char *array,
 	  /* The return array will have as many
 	     elements as there are in VECTOR.  */
 	  total = GFC_DESCRIPTOR_EXTENT(vector,0);
+      if (total < 0)
+	    {
+	      total = 0;
+	      vector = NULL;
+	    }
 	}
       else
 	{
@@ -163,9 +168,8 @@ pack_internal (gfc_array_char *ret, const gfc_array_char *array,
 
 	  ret_extent = GFC_DESCRIPTOR_EXTENT(ret,0);
 	  if (total != ret_extent)
-	    runtime_error ("Incorrect extent in return value of PACK intrinsic;"
-			   " is %ld, should be %ld", (long int) total,
-			   (long int) ret_extent);
+	    runtime_error ("Incorrect extent in return value of PACK intrinsic; is %ld, should be %ld", 
+		       (long int) total, (long int) ret_extent);
 	}
     }
 
@@ -250,7 +254,6 @@ pack (gfc_array_char *ret, const gfc_array_char *array,
   index_type size;
 
   type_size = GFC_DTYPE_TYPE_SIZE(array);
-
   switch(type_size)
     {
     case GFC_DTYPE_LOGICAL_1:
@@ -310,12 +313,14 @@ pack (gfc_array_char *ret, const gfc_array_char *array,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_REAL_16
     case GFC_DTYPE_REAL_16:
       pack_r16 ((gfc_array_r16 *) ret, (gfc_array_r16 *) array,
 		(gfc_array_l1 *) mask, (gfc_array_r16 *) vector);
       return;
 # endif
+#endif
 #endif
 
     case GFC_DTYPE_COMPLEX_4:
@@ -342,11 +347,13 @@ pack (gfc_array_char *ret, const gfc_array_char *array,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_COMPLEX_16
     case GFC_DTYPE_COMPLEX_16:
       pack_c16 ((gfc_array_c16 *) ret, (gfc_array_c16 *) array,
 		(gfc_array_l1 *) mask, (gfc_array_c16 *) vector);
       return;
+# endif
 # endif
 #endif
 

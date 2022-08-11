@@ -25,6 +25,9 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #include "io.h"
 #include "unix.h"
 #include <limits.h>
+#if !HAVE_UNLINK_OPEN_FILE
+#include <string.h>
+#endif
 
 typedef enum
 { CLOSE_DELETE, CLOSE_KEEP, CLOSE_UNSPECIFIED }
@@ -82,8 +85,7 @@ st_close (st_parameter_close *clp)
 	  if (status == CLOSE_DELETE)
 	    {
 	      if (u->flags.readonly)
-		generate_warning (&clp->common, "STATUS set to DELETE on CLOSE"
-				  " but file protected by READONLY specifier");
+		generate_warning (&clp->common, "STATUS set to DELETE on CLOSE but file protected by READONLY specifier");
 	      else
 		{
 #if HAVE_UNLINK_OPEN_FILE

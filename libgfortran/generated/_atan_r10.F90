@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_10)
 #ifdef HAVE_ATANL
 
-elemental function _gfortran_specific__atan_r10 (parm)
+elemental function _lfortran_specific__atan_r10 (parm)
    real (kind=10), intent (in) :: parm
-   real (kind=10) :: _gfortran_specific__atan_r10
+   real (kind=10) :: _lfortran_specific__atan_r10
 
-   _gfortran_specific__atan_r10 = atan (parm)
+   _lfortran_specific__atan_r10 = atan (parm)
 end function
 
 #endif

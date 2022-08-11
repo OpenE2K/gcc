@@ -34,11 +34,11 @@
 
 
 
-elemental function _gfortran_specific__mod_r4 (p1, p2)
+elemental function _lfortran_specific__mod_r4 (p1, p2)
    real (kind=4), intent (in) :: p1, p2
-   real (kind=4) :: _gfortran_specific__mod_r4
+   real (kind=4) :: _lfortran_specific__mod_r4
 
-   _gfortran_specific__mod_r4 = mod (p1, p2)
+   _lfortran_specific__mod_r4 = mod (p1, p2)
 end function
 
 

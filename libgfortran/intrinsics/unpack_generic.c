@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <assert.h>
 #include <string.h>
 
@@ -38,14 +38,13 @@ unpack_bounds (gfc_array_char *ret, const gfc_array_char *vector,
   vec_size = size0 ((array_t *) vector);
   mask_count = count_0 (mask);
   if (vec_size < mask_count)
-    runtime_error ("Incorrect size of return value in UNPACK"
-		   " intrinsic: should be at least %ld, is"
-		   " %ld", (long int) mask_count,
+    runtime_error ("Incorrect size of return value in UNPACK intrinsic: should be at least %ld, is %ld",
+	       (long int) mask_count,
 		   (long int) vec_size);
 
   if (field != NULL)
     bounds_equal_extents ((array_t *) field, (array_t *) mask,
-			  "FIELD", "UNPACK");
+			  _("FIELD argument"), "UNPACK");
 
   if (ret->base_addr != NULL)
     bounds_equal_extents ((array_t *) ret, (array_t *) mask,
@@ -278,10 +277,12 @@ unpack1 (gfc_array_char *ret, const gfc_array_char *vector,
 # endif
 
 # ifdef HAVE_GFC_REAL_16
+#  if defined(HAVE_FLOAT128)
     case GFC_DTYPE_REAL_16:
       unpack1_r16 ((gfc_array_r16 *) ret, (gfc_array_r16 *) vector,
 		   mask, (gfc_array_r16 *) field);
       return;
+# endif
 # endif
 #endif
 
@@ -309,11 +310,13 @@ unpack1 (gfc_array_char *ret, const gfc_array_char *vector,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_COMPLEX_16
     case GFC_DTYPE_COMPLEX_16:
       unpack1_c16 ((gfc_array_c16 *) ret, (gfc_array_c16 *) vector,
 		   mask, (gfc_array_c16 *) field);
       return;
+# endif
 # endif
 #endif
 
@@ -489,10 +492,12 @@ unpack0 (gfc_array_char *ret, const gfc_array_char *vector,
 # endif
 
 # ifdef HAVE_GFC_REAL_16
+#  if defined(HAVE_FLOAT128)
     case GFC_DTYPE_REAL_16:
       unpack0_r16 ((gfc_array_r16 *) ret, (gfc_array_r16 *) vector,
 		   mask, (GFC_REAL_16 *) field);
       return;
+# endif
 # endif
 #endif
 
@@ -520,11 +525,13 @@ unpack0 (gfc_array_char *ret, const gfc_array_char *vector,
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # ifdef HAVE_GFC_COMPLEX_16
     case GFC_DTYPE_COMPLEX_16:
       unpack0_c16 ((gfc_array_c16 *) ret, (gfc_array_c16 *) vector,
 		   mask, (GFC_COMPLEX_16 *) field);
       return;
+# endif
 # endif
 #endif
 

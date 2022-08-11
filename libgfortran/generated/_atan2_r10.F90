@@ -34,11 +34,11 @@
 
 #ifdef HAVE_ATAN2L
 
-elemental function _gfortran_specific__atan2_r10 (p1, p2)
+elemental function _lfortran_specific__atan2_r10 (p1, p2)
    real (kind=10), intent (in) :: p1, p2
-   real (kind=10) :: _gfortran_specific__atan2_r10
+   real (kind=10) :: _lfortran_specific__atan2_r10
 
-   _gfortran_specific__atan2_r10 = atan2 (p1, p2)
+   _lfortran_specific__atan2_r10 = atan2 (p1, p2)
 end function
 
 #endif

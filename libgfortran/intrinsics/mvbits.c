@@ -26,7 +26,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 /* TODO: This should be replaced by a compiler builtin.  */
 
 #ifndef SUB_NAME
-#include <libgfortran.h>
+#include <liblfortran.h>
 #endif
 
 #ifdef SUB_NAME

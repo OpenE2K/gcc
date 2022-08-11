@@ -3,71 +3,36 @@
 
 ACLOCAL_AMFLAGS = -I .. -I ../config
 
-## May be used by toolexeclibdir.
-gcc_version := $(shell @get_gcc_base_ver@ $(top_srcdir)/../gcc/BASE-VER)
 
-## Symbol versioning (copied from libssp).
-if LIBGFOR_USE_SYMVER
-if LIBGFOR_USE_SYMVER_GNU
-version_arg = -Wl,--version-script=$(srcdir)/gfortran.map
-version_dep = $(srcdir)/gfortran.map
-endif
-if LIBGFOR_USE_SYMVER_SUN
-version_arg = -Wl,-M,gfortran.map-sun
-version_dep = gfortran.map-sun
-gfortran.map-sun : $(srcdir)/gfortran.map \
-		$(top_srcdir)/../contrib/make_sunver.pl \
-		$(libgfortran_la_OBJECTS) $(libgfortran_la_LIBADD)
-	perl $(top_srcdir)/../contrib/make_sunver.pl \
-	  $(srcdir)/gfortran.map \
-	  $(libgfortran_la_OBJECTS:%.lo=.libs/%.o) \
-	 `echo $(libgfortran_la_LIBADD) | \
-	    sed 's,/\([^/.]*\)\.la,/.libs/\1.a,g'` \
-	 > $@ || (rm -f $@ ; exit 1)
-endif
-else
 version_arg =
 version_dep =
-endif
 
 LTLDFLAGS = $(shell $(SHELL) $(top_srcdir)/../libtool-ldflags $(LDFLAGS)) \
 	    $(lt_host_flags)
 
-toolexeclib_LTLIBRARIES = libgfortran.la
-toolexeclib_DATA = libgfortran.spec
-libgfortran_la_LINK = $(LINK) $(libgfortran_la_LDFLAGS)
-libgfortran_la_LDFLAGS = -version-info `grep -v '^\#' $(srcdir)/libtool-version` \
-	$(LTLDFLAGS) $(LIBQUADLIB) ../libbacktrace/libbacktrace.la \
-	$(HWCAP_LDFLAGS) \
-	-lm $(extra_ldflags_libgfortran) \
-	$(version_arg) -Wc,-shared-libgcc
-libgfortran_la_DEPENDENCIES = $(version_dep) libgfortran.spec $(LIBQUADLIB_DEP)
+toolexeclib_LTLIBRARIES = liblfortran.la
+toolexeclib_DATA = liblfortran.spec
+libglortran_la_LINK = $(LINK) $(liblfortran_la_LDFLAGS)
+liblfortran_la_LDFLAGS = -version-info `grep -v '^\#' $(srcdir)/libtool-version` \
+	$(LTLDFLAGS) $(LIBQUADLIB)  \
+	$(HWCAP_LDFLAGS) -lm 
+liblfortran_la_DEPENDENCIES = $(version_dep) liblfortran.spec $(LIBQUADLIB_DEP)
 
 cafexeclib_LTLIBRARIES = libcaf_single.la
-cafexeclibdir = $(libdir)/gcc/$(target_alias)/$(gcc_version)$(MULTISUBDIR)
+cafexeclibdir = $(libdir)
 libcaf_single_la_SOURCES = caf/single.c
 libcaf_single_la_LDFLAGS = -static
 libcaf_single_la_DEPENDENCIES = caf/libcaf.h
 libcaf_single_la_LINK = $(LINK) $(libcaf_single_la_LDFLAGS)
 
 if IEEE_SUPPORT
-fincludedir = $(libdir)/gcc/$(target_alias)/$(gcc_version)$(MULTISUBDIR)/finclude
-nodist_finclude_HEADERS = ieee_arithmetic.mod ieee_exceptions.mod ieee_features.mod
+fincludedir = $(includedir)
+nodist_finclude_HEADERS =  ieee_arithmetic.mod ieee_exceptions.mod ieee_features.mod $(srcdir)/omp_lib.h $(srcdir)/omp_lib.mod $(srcdir)/omp_lib_kinds.mod
 endif
 
 ## io.h conflicts with a system header on some platforms, so
 ## use -iquote
-AM_CPPFLAGS = -iquote$(srcdir)/io -I$(srcdir)/$(MULTISRCTOP)../gcc \
-	      -I$(srcdir)/$(MULTISRCTOP)../gcc/config $(LIBQUADINCLUDE) \
-	      -I$(MULTIBUILDTOP)../../$(host_subdir)/gcc \
-	      -I$(srcdir)/$(MULTISRCTOP)../libgcc \
-	      -I$(MULTIBUILDTOP)../libgcc \
-	      -I$(srcdir)/$(MULTISRCTOP)../libbacktrace \
-	      -I$(MULTIBUILDTOP)../libbacktrace \
-	      -I../libbacktrace
-
-# Fortran rules for complex multiplication and division
-AM_CFLAGS += -fcx-fortran-rules
+AM_CPPFLAGS =
 
 # Use -ffunction-sections -fdata-sections if supported by the compiler
 AM_CFLAGS += $(SECTION_FLAGS)
@@ -139,8 +104,6 @@ intrinsics/unpack_generic.c \
 runtime/in_pack_generic.c \
 runtime/in_unpack_generic.c
 
-if !LIBGFOR_MINIMAL
-
 gfor_helper_src+= \
 intrinsics/access.c \
 intrinsics/c99_functions.c \
@@ -172,11 +135,9 @@ intrinsics/symlnk.c \
 intrinsics/system_clock.c \
 intrinsics/time.c \
 intrinsics/umask.c \
-intrinsics/unlink.c
-
-endif
-
-if IEEE_SUPPORT
+intrinsics/unlink.c \
+generated/index.c \
+generated/dprod.c 
 
 gfor_helper_src+=ieee/ieee_helper.c
 
@@ -184,12 +145,6 @@ gfor_ieee_src= \
 ieee/ieee_arithmetic.F90 \
 ieee/ieee_exceptions.F90 \
 ieee/ieee_features.F90
-
-else
-
-gfor_ieee_src=
-
-endif
 
 gfor_src= \
 runtime/bounds.c \
@@ -642,8 +597,8 @@ gfor_built_src= $(i_all_c) $(i_any_c) $(i_count_c) $(i_maxloc0_c) \
     $(i_matmul_c) $(i_matmull_c) $(i_shape_c) $(i_eoshift1_c) \
     $(i_eoshift3_c) $(i_cshift1_c) $(i_reshape_c) $(in_pack_c) $(in_unpack_c) \
     $(i_pow_c) $(i_pack_c) $(i_unpack_c) \
-    $(i_spread_c) selected_int_kind.inc selected_real_kind.inc kinds.h \
-    $(i_cshift0_c) kinds.inc c99_protos.inc fpu-target.h fpu-target.inc
+    $(i_spread_c) selected_real_kind.inc \
+    $(i_cshift0_c) c99_protos.inc fpu-target.inc
 
 # Machine generated specifics
 gfor_built_specific_src= \
@@ -792,21 +747,19 @@ gfor_specific_src= \
 $(gfor_built_specific_src) \
 $(gfor_built_specific2_src) \
 $(gfor_misc_specifics) \
-intrinsics/dprod_r8.f90 \
-intrinsics/f2c_specifics.F90
+intrinsics/dprod_r8.f90 
 
 # Turn on vectorization and loop unrolling for matmul.
-$(patsubst %.c,%.lo,$(notdir $(i_matmul_c))): AM_CFLAGS += -ffast-math -ftree-vectorize -funroll-loops --param max-unroll-times=4 
+$(patsubst %.c,%.lo,$(notdir $(i_matmul_c))): AM_CFLAGS += -ffast-math -fno-associative-math -funroll-loops --param max-unroll-times=4 
 # Logical matmul doesn't vectorize.
 $(patsubst %.c,%.lo,$(notdir $(i_matmull_c))): AM_CFLAGS += -funroll-loops
 
-# Add the -fallow-leading-underscore option when needed
-$(patsubst %.F90,%.lo,$(patsubst %.f90,%.lo,$(notdir $(gfor_specific_src)))): AM_FCFLAGS += -fallow-leading-underscore
-selected_real_kind.lo selected_int_kind.lo: AM_FCFLAGS += -fallow-leading-underscore
+$(patsubst %.F90,%.lo,$(patsubst %.f90,%.lo,$(notdir $(gfor_specific_src)))): 
+selected_real_kind.lo selected_int_kind.lo: 
 
 if IEEE_SUPPORT
 # Add flags for IEEE modules
-$(patsubst %.F90,%.lo,$(notdir $(gfor_ieee_src))): AM_FCFLAGS += -Wno-unused-dummy-argument -Wno-c-binding-type -ffree-line-length-0 -fallow-leading-underscore
+$(patsubst %.F90,%.lo,$(notdir $(gfor_ieee_src))): AM_FCFLAGS += -ffree-line-length-0 
 endif
 
 # Dependencies between IEEE_ARITHMETIC and IEEE_EXCEPTIONS
@@ -828,32 +781,32 @@ prereq_SRC = $(gfor_src) $(gfor_built_src) $(gfor_io_src) \
 
 if onestep
 # dummy sources for libtool
-BUILT_SOURCES+=libgfortran_c.c libgfortran_f.f90
-libgfortran_c.c libgfortran_f.f90 libgfortran_F.F90:
+BUILT_SOURCES+=liblfortran_c.c liblfortran_f.f90
+liblfortran_c.c liblfortran_f.f90 liblfortran_F.F90:
 	echo > $@
 # overrides for libtool perusing the dummy sources
-libgfortran_c.o: $(filter %.c,$(prereq_SRC))
+liblfortran_c.o: $(filter %.c,$(prereq_SRC))
 	$(COMPILE) -c $^ -o $@ -combine
 
-libgfortran_c.lo: $(filter %.c,$(prereq_SRC))
+liblfortran_c.lo: $(filter %.c,$(prereq_SRC))
 	$(LTCOMPILE) -c -o $@ $^ -combine
 
-#libgfortran_f.o: $(filter %.f %.f90,$(prereq_SRC))
+#liblfortran_f.o: $(filter %.f %.f90,$(prereq_SRC))
 #	$(FCCOMPILE) -c $^ -o $@ -combine
 
-#libgfortran_f.lo: $(filter %.f %.f90,$(prereq_SRC))
+#liblfortran_f.lo: $(filter %.f %.f90,$(prereq_SRC))
 #	$(LTFCCOMPILE) -c -o $@ $^ -combine
 # not currently used:
-#libgfortran_F.o: $(filter %.F %.F90,$(prereq_SRC))
+#liblfortran_F.o: $(filter %.F %.F90,$(prereq_SRC))
 #	$(PPFCCOMPILE) -c $^ -o $@ -combine
 #
-#libgfortran_F.lo: 
+#liblfortran_F.lo: 
 #	$(LTPPFCCOMPILE) -c -o $@ $^ -combine
 
-libgfortran_la_SOURCES = libgfortran_c.c $(filter-out %.c,$(prereq_SRC))
+liblfortran_la_SOURCES = liblfortran_c.c $(filter-out %.c,$(prereq_SRC))
 
 else
-libgfortran_la_SOURCES = $(prereq_SRC)
+liblfortran_la_SOURCES = $(prereq_SRC)
 
 endif
 
@@ -862,17 +815,14 @@ I_M4_DEPS0=$(I_M4_DEPS) m4/iforeach.m4
 I_M4_DEPS1=$(I_M4_DEPS) m4/ifunction.m4
 I_M4_DEPS2=$(I_M4_DEPS) m4/ifunction_logical.m4
 
-kinds.h: $(srcdir)/mk-kinds-h.sh
-	$(SHELL) $(srcdir)/mk-kinds-h.sh '$(FCCOMPILE)' > $@ || rm $@
+# kinds.h: $(srcdir)/mk-kinds-h.sh
+#	$(SHELL) $(srcdir)/mk-kinds-h.sh '$(FCCOMPILE)' > $@ || rm $@
 
-kinds.inc: kinds.h
-	grep '^#' < kinds.h > $@
+# kinds.inc: kinds.h
+#	grep '^#' < kinds.h > $@
 
 c99_protos.inc: $(srcdir)/c99_protos.h
 	grep '^#' < $(srcdir)/c99_protos.h > $@
-
-selected_int_kind.inc: $(srcdir)/mk-sik-inc.sh
-	$(SHELL) $(srcdir)/mk-sik-inc.sh '$(FCCOMPILE)' > $@ || rm $@
 
 selected_real_kind.inc: $(srcdir)/mk-srk-inc.sh
 	$(SHELL) $(srcdir)/mk-srk-inc.sh '$(FCCOMPILE)' > $@ || rm $@
@@ -880,9 +830,8 @@ selected_real_kind.inc: $(srcdir)/mk-srk-inc.sh
 fpu-target.h: $(srcdir)/$(FPU_HOST_HEADER)
 	cp $(srcdir)/$(FPU_HOST_HEADER) $@
 
-fpu-target.inc: fpu-target.h $(srcdir)/libgfortran.h
-	grep '^#define GFC_FPE_' < $(top_srcdir)/../gcc/fortran/libgfortran.h > $@ || true
-	grep '^#define GFC_FPE_' < $(srcdir)/libgfortran.h >> $@ || true
+fpu-target.inc: fpu-target.h 
+	grep '^#define GFC_FPE_' < $(srcdir)/commonLibFortran.h > $@ || true
 
 ## A 'normal' build shouldn't need to regenerate these
 ## so we only include them in maintainer mode

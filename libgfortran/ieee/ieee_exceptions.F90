@@ -83,7 +83,7 @@ contains
 
     interface
       subroutine helper(ptr) &
-          bind(c, name="_gfortrani_get_fpu_state")
+          bind(c, name="_lfortrani_get_fpu_state")
         use, intrinsic :: iso_c_binding, only : c_char
         character(kind=c_char) :: ptr(*)
       end subroutine
@@ -98,7 +98,7 @@ contains
 
     interface
       subroutine helper(ptr) &
-          bind(c, name="_gfortrani_set_fpu_state")
+          bind(c, name="_lfortrani_set_fpu_state")
         use, intrinsic :: iso_c_binding, only : c_char
         character(kind=c_char) :: ptr(*)
       end subroutine
@@ -116,7 +116,7 @@ contains
 
     interface
       pure integer function helper() &
-        bind(c, name="_gfortrani_get_fpu_except_flags")
+        bind(c, name="_lfortrani_get_fpu_except_flags")
       end function
     end interface
 
@@ -130,7 +130,7 @@ contains
 
     interface
       pure subroutine helper(set, clear) &
-          bind(c, name="_gfortrani_set_fpu_except_flags")
+          bind(c, name="_lfortrani_set_fpu_except_flags")
         integer, intent(in), value :: set, clear
       end subroutine
     end interface
@@ -151,7 +151,7 @@ contains
 
     interface
       pure integer function helper() &
-          bind(c, name="_gfortrani_get_fpu_trap_exceptions")
+          bind(c, name="_lfortrani_get_fpu_trap_exceptions")
       end function
     end interface
 
@@ -165,7 +165,7 @@ contains
 
     interface
       pure subroutine helper(trap, notrap) &
-          bind(c, name="_gfortrani_set_fpu_trap_exceptions")
+          bind(c, name="_lfortrani_set_fpu_trap_exceptions")
         integer, intent(in), value :: trap, notrap
       end subroutine
     end interface
@@ -185,7 +185,7 @@ contains
 
     interface
       pure integer function helper(flag) &
-          bind(c, name="_gfortrani_support_fpu_trap")
+          bind(c, name="_lfortrani_support_fpu_trap")
         integer, intent(in), value :: flag
       end function
     end interface
@@ -199,7 +199,7 @@ contains
 
     interface
       pure integer function helper(flag) &
-          bind(c, name="_gfortrani_support_fpu_flag")
+          bind(c, name="_lfortrani_support_fpu_flag")
         integer, intent(in), value :: flag
       end function
     end interface

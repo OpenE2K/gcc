@@ -113,6 +113,7 @@ si_max (int length)
       return GFC_INTEGER_1_HUGE;
     default:
       internal_error (NULL, "Bad integer kind");
+      return 0;
     }
 }
 
@@ -188,7 +189,7 @@ convert_real (st_parameter_dt *dtp, void *dest, const char *buffer, int length)
   if (buffer == endptr)
     {
       generate_error (&dtp->common, LIBERROR_READ_VALUE,
-  		      "Error during floating point read");
+  		      _("Error during floating point read"));
       next_record (dtp, 1);
       return 1;
     }
@@ -308,7 +309,7 @@ read_l (st_parameter_dt *dtp, const fnode *f, char *dest, int length)
     default:
     bad:
       generate_error (&dtp->common, LIBERROR_READ_VALUE,
-		      "Bad value on logical read");
+		      _("Bad value on logical read"));
       next_record (dtp, 1);
       break;
     }
@@ -377,7 +378,7 @@ read_utf8 (st_parameter_dt *dtp, int *nbytes)
   return c;
       
  invalid:
-  generate_error (&dtp->common, LIBERROR_READ_VALUE, "Invalid UTF-8 encoding");
+  generate_error (&dtp->common, LIBERROR_READ_VALUE, _("Invalid UTF-8 encoding"));
   return (gfc_char4_t) '?';
 }
 
@@ -709,13 +710,13 @@ read_decimal (st_parameter_dt *dtp, const fnode *f, char *dest, int length)
 
  bad:
   generate_error (&dtp->common, LIBERROR_READ_VALUE,
-		  "Bad value during integer read");
+		  _("Bad value during integer read"));
   next_record (dtp, 1);
   return;
 
  overflow:
   generate_error (&dtp->common, LIBERROR_READ_OVERFLOW,
-		  "Value overflowed during integer read");
+		  _("Value overflowed during integer read"));
   next_record (dtp, 1);
 
 }
@@ -858,13 +859,13 @@ read_radix (st_parameter_dt *dtp, const fnode *f, char *dest, int length,
 
  bad:
   generate_error (&dtp->common, LIBERROR_READ_VALUE,
-		  "Bad value during integer read");
+		  _("Bad value during integer read"));
   next_record (dtp, 1);
   return;
 
  overflow:
   generate_error (&dtp->common, LIBERROR_READ_OVERFLOW,
-		  "Value overflowed during integer read");
+		  _("Value overflowed during integer read"));
   next_record (dtp, 1);
 
 }
@@ -1151,7 +1152,7 @@ done:
      significand.  */
   else if (!seen_int_digit && !seen_dec_digit)
     {
-      notify_std (&dtp->common, GFC_STD_LEGACY, 
+      notify_std (&dtp->common, FTN_STD_LEGACY, 
 		  "REAL input of style 'E+NN'");
       *(out++) = '0';
     }

@@ -30,7 +30,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
    31, 1192-1201 (1988).  It is also provided solely for compatibility 
    with G77.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <gthr.h>
 
 #define GFC_RAND_A	16807

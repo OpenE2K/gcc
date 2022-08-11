@@ -24,7 +24,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 
@@ -104,14 +104,12 @@ get_environment_variable_i4 (char *name, char *value, GFC_INTEGER_4 *length,
     return;
 
   if (name_len < 1)
-    runtime_error ("Zero-length string passed as name to "
-		   "get_environment_variable.");
+    runtime_error ("Zero-length string passed as name to get_environment_variable.");
 
   if (value != NULL)
     { 
       if (value_len < 1)
-	runtime_error ("Zero-length string passed as value to "
-		       "get_environment_variable.");
+	runtime_error ("Zero-length string passed as value to get_environment_variable.");
       else
 	memset (value, ' ', value_len); /* Blank the string.  */
     }

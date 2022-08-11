@@ -527,7 +527,6 @@ set_internal_unit (st_parameter_dt *dtp, gfc_unit *iunit, int kind)
   return iunit;
 }
 
-
 /* get_unit()-- Returns the unit structure associated with the integer
    unit or the internal file.  */
 
@@ -538,7 +537,7 @@ get_unit (st_parameter_dt *dtp, int do_create)
 
   if ((dtp->common.flags & IOPARM_DT_HAS_INTERNAL_UNIT) != 0)
     {
-      int kind;
+      int kind = 0;
       if (dtp->common.unit == GFC_INTERNAL_UNIT)
         kind = 1;
       else if (dtp->common.unit == GFC_INTERNAL_UNIT4)
@@ -546,14 +545,13 @@ get_unit (st_parameter_dt *dtp, int do_create)
       else
 	internal_error (&dtp->common, "get_unit(): Bad internal unit KIND");
 
-      dtp->u.p.unit_is_internal = 1;
-      dtp->common.unit = newunit_alloc ();
-      unit = get_gfc_unit (dtp->common.unit, do_create);
-      set_internal_unit (dtp, unit, kind);
-      fbuf_init (unit, 128);
-      return unit;
-    }
-
+	  dtp->u.p.unit_is_internal = 1;
+	  dtp->common.unit = newunit_alloc ();
+	  unit = get_gfc_unit (dtp->common.unit, do_create);
+	  set_internal_unit (dtp, unit, kind);
+	  fbuf_init (unit, 128);
+	  return unit;
+	}
   /* Has to be an external unit.  */
   dtp->u.p.unit_is_internal = 0;
   dtp->internal_unit = NULL;

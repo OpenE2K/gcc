@@ -23,10 +23,10 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
-#if defined (HAVE_GFC_COMPLEX_10)
+#if defined (HAVE_GFC_COMPLEX_10) && !defined(GFC_REAL_16_IS_FLOAT128)
 
 /* Allocates a block of memory with internal_malloc if the array needs
    repacking.  */

@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <assert.h>
 
 
@@ -99,37 +99,30 @@ matmul_l8 (gfc_array_l8 * const restrict retarray,
 	    arg_extent = GFC_DESCRIPTOR_EXTENT(b,1);
 	    ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,0);
 	    if (arg_extent != ret_extent)
-	      runtime_error ("Incorrect extent in return array in"
-			     " MATMUL intrinsic: is %ld, should be %ld",
-			     (long int) ret_extent, (long int) arg_extent);
+	    runtime_error ("Incorrect extent in return array in MATMUL intrinsic: is %ld, should be %ld",
+			   (long int) ret_extent, (long int) arg_extent);
 	  }
 	else if (GFC_DESCRIPTOR_RANK (b) == 1)
 	  {
 	    arg_extent = GFC_DESCRIPTOR_EXTENT(a,0);
 	    ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,0);
 	    if (arg_extent != ret_extent)
-	      runtime_error ("Incorrect extent in return array in"
-			     " MATMUL intrinsic: is %ld, should be %ld",
-			     (long int) ret_extent, (long int) arg_extent);	    
+	    runtime_error ("Incorrect extent in return array in MATMUL intrinsic: is %ld, should be %ld",
+			   (long int) ret_extent, (long int) arg_extent);
 	  }
 	else
 	  {
 	    arg_extent = GFC_DESCRIPTOR_EXTENT(a,0);
 	    ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,0);
 	    if (arg_extent != ret_extent)
-	      runtime_error ("Incorrect extent in return array in"
-			     " MATMUL intrinsic for dimension 1:"
-			     " is %ld, should be %ld",
-			     (long int) ret_extent, (long int) arg_extent);
+	    runtime_error ("Incorrect extent in return array in MATMUL intrinsic for dimension 1: is %ld, should be %ld",
+			   (long int) ret_extent, (long int) arg_extent);
 
 	    arg_extent = GFC_DESCRIPTOR_EXTENT(b,1);
 	    ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,1);
 	    if (arg_extent != ret_extent)
-	      runtime_error ("Incorrect extent in return array in"
-			     " MATMUL intrinsic for dimension 2:"
-			     " is %ld, should be %ld",
-			     (long int) ret_extent, (long int) arg_extent);
-	  }
+	    runtime_error ("Incorrect extent in return array in MATMUL intrinsic for dimension 2: is %ld, should be %ld",
+			   (long int) ret_extent, (long int) arg_extent);	  }
       }
 
   abase = a->base_addr;

@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_4)
 #ifdef HAVE_TRUNCF
 
-elemental function _gfortran_specific__aint_r4 (parm)
+elemental function _lfortran_specific__aint_r4 (parm)
    real (kind=4), intent (in) :: parm
-   real (kind=4) :: _gfortran_specific__aint_r4
+   real (kind=4) :: _lfortran_specific__aint_r4
 
-   _gfortran_specific__aint_r4 = aint (parm)
+   _lfortran_specific__aint_r4 = aint (parm)
 end function
 
 #endif

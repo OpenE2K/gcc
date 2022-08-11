@@ -32,23 +32,17 @@ void
 set_fpu (void)
 {
   if (options.fpe & GFC_FPE_INVALID)
-    estr_write ("Fortran runtime warning: IEEE 'invalid operation' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'invalid operation' exception not supported.\n");
   if (options.fpe & GFC_FPE_DENORMAL)
-    estr_write ("Fortran runtime warning: Floating point 'denormal operand' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: Floating point 'denormal operand' exception not supported.\n");
   if (options.fpe & GFC_FPE_ZERO)
-    estr_write ("Fortran runtime warning: IEEE 'division by zero' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'division by zero' exception not supported.\n");
   if (options.fpe & GFC_FPE_OVERFLOW)
-    estr_write ("Fortran runtime warning: IEEE 'overflow' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'overflow' exception not supported.\n");
   if (options.fpe & GFC_FPE_UNDERFLOW)
-    estr_write ("Fortran runtime warning: IEEE 'underflow' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'underflow' exception not supported.\n");
   if (options.fpe & GFC_FPE_INEXACT)
-    estr_write ("Fortran runtime warning: IEEE 'inexact' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'inexact' exception not supported.\n");
 }
 
 void

@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_16)
 #ifdef HAVE_TANHL
 
-elemental function _gfortran_specific__tanh_r16 (parm)
+elemental function _lfortran_specific__tanh_r16 (parm)
    real (kind=16), intent (in) :: parm
-   real (kind=16) :: _gfortran_specific__tanh_r16
+   real (kind=16) :: _lfortran_specific__tanh_r16
 
-   _gfortran_specific__tanh_r16 = tanh (parm)
+   _lfortran_specific__tanh_r16 = tanh (parm)
 end function
 
 #endif

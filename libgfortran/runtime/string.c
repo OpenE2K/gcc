@@ -22,7 +22,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 #include <strings.h>
 
@@ -163,7 +163,7 @@ find_option (st_parameter_common *cmp, const char *s1, gfc_charlen_type s1_len,
     if (len == strlen(opts->name) && strncasecmp (s1, opts->name, len) == 0)
       return opts->value;
 
-  generate_error (cmp, LIBERROR_BAD_OPTION, error_message);
+  generate_error (cmp, LIBERROR_BAD_OPTION, _(error_message));
 
   return -1;
 }

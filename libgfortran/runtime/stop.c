@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -81,7 +81,7 @@ report_exception (void)
 
 /* A numeric STOP statement.  */
 
-extern _Noreturn void stop_numeric (GFC_INTEGER_4);
+extern  void stop_numeric (GFC_INTEGER_4);
 export_proto(stop_numeric);
 
 void
@@ -114,7 +114,7 @@ stop_string (const char *string, GFC_INTEGER_4 len)
    initiates error termination of execution."  Thus, error_stop_string returns
    a nonzero exit status code.  */
 
-extern _Noreturn void error_stop_string (const char *, GFC_INTEGER_4);
+extern  void error_stop_string (const char *, GFC_INTEGER_4);
 export_proto(error_stop_string);
 
 void
@@ -131,7 +131,7 @@ error_stop_string (const char *string, GFC_INTEGER_4 len)
 
 /* A numeric ERROR STOP statement.  */
 
-extern _Noreturn void error_stop_numeric (GFC_INTEGER_4);
+extern  void error_stop_numeric (GFC_INTEGER_4);
 export_proto(error_stop_numeric);
 
 void

@@ -23,7 +23,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
@@ -107,7 +107,8 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 ssize_t
 estr_write (const char *str)
 {
-  return write (STDERR_FILENO, str, strlen (str));
+	const char* new_str = _(str);
+  return write (STDERR_FILENO, new_str, strlen (new_str));
 }
 
 
@@ -292,13 +293,13 @@ show_locus (st_parameter_common *cmp)
 
       if (filename != NULL)
 	{
-	  st_printf ("At line %d of file %s (unit = %d, file = '%s')\n",
+	  st_printf (_("At line %d of file %s (unit = %d, file = '%s')\n"),
 		   (int) cmp->line, cmp->filename, (int) cmp->unit, filename);
 	  free (filename);
 	}
       else
 	{
-	  st_printf ("At line %d of file %s (unit = %d)\n",
+	  st_printf (_("At line %d of file %s (unit = %d)\n"),
 		   (int) cmp->line, cmp->filename, (int) cmp->unit);
 	}
       return;
@@ -359,7 +360,7 @@ runtime_error (const char *message, ...)
   recursion_check ();
   estr_write ("Fortran runtime error: ");
   va_start (ap, message);
-  st_vprintf (message, ap);
+  st_vprintf (_(message), ap);
   va_end (ap);
   estr_write ("\n");
   exit_error (2);
@@ -434,91 +435,91 @@ translate_error (int code)
   switch (code)
     {
     case LIBERROR_EOR:
-      p = "End of record";
+      p = _("End of record");
       break;
 
     case LIBERROR_END:
-      p = "End of file";
+      p = _("End of file");
       break;
 
     case LIBERROR_OK:
-      p = "Successful return";
+      p = _("Successful return");
       break;
 
     case LIBERROR_OS:
-      p = "Operating system error";
+      p = _("Operating system error");
       break;
 
     case LIBERROR_BAD_OPTION:
-      p = "Bad statement option";
+      p = _("Bad statement option");
       break;
 
     case LIBERROR_MISSING_OPTION:
-      p = "Missing statement option";
+      p = _("Missing statement option");
       break;
 
     case LIBERROR_OPTION_CONFLICT:
-      p = "Conflicting statement options";
+      p = _("Conflicting statement options");
       break;
 
     case LIBERROR_ALREADY_OPEN:
-      p = "File already opened in another unit";
+      p = _("File already opened in another unit");
       break;
 
     case LIBERROR_BAD_UNIT:
-      p = "Unattached unit";
+      p = _("Unattached unit");
       break;
 
     case LIBERROR_FORMAT:
-      p = "FORMAT error";
+      p = _("FORMAT error");
       break;
 
     case LIBERROR_BAD_ACTION:
-      p = "Incorrect ACTION specified";
+      p = _("Incorrect ACTION specified");
       break;
 
     case LIBERROR_ENDFILE:
-      p = "Read past ENDFILE record";
+      p = _("Read past ENDFILE record");
       break;
 
     case LIBERROR_BAD_US:
-      p = "Corrupt unformatted sequential file";
+      p = _("Corrupt unformatted sequential file");
       break;
 
     case LIBERROR_READ_VALUE:
-      p = "Bad value during read";
+      p = _("Bad value during read");
       break;
 
     case LIBERROR_READ_OVERFLOW:
-      p = "Numeric overflow on read";
+      p = _("Numeric overflow on read");
       break;
 
     case LIBERROR_INTERNAL:
-      p = "Internal error in run-time library";
+      p = _("Internal error in run-time library");
       break;
 
     case LIBERROR_INTERNAL_UNIT:
-      p = "Internal unit I/O error";
+      p = _("Internal unit I/O error");
       break;
 
     case LIBERROR_DIRECT_EOR:
-      p = "Write exceeds length of DIRECT access record";
+      p = _("Write exceeds length of DIRECT access record");
       break;
 
     case LIBERROR_SHORT_RECORD:
-      p = "I/O past end of record on unformatted file";
+      p = _("I/O past end of record on unformatted file");
       break;
 
     case LIBERROR_CORRUPT_FILE:
-      p = "Unformatted file structure has been corrupted";
+      p = _("Unformatted file structure has been corrupted");
       break;
 
     case LIBERROR_INQUIRE_INTERNAL_UNIT:
-      p = "Inquire statement identifies an internal file";
+      p = _("Inquire statement identifies an internal file");
       break;
 
     default:
-      p = "Unknown error code";
+      p = _("Unknown error code");
       break;
     }
 
@@ -611,7 +612,7 @@ generate_warning (st_parameter_common *cmp, const char *message)
 }
 
 
-/* Whether, for a feature included in a given standard set (GFC_STD_*),
+/* Whether, for a feature included in a given standard set (FTN_STD_*),
    we should issue an error or a warning, or be quiet.  */
 
 notification

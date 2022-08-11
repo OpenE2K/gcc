@@ -30,7 +30,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
    compiler translates the actual intrinsics calls to calls to
    functions in this file.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 #include <string.h>
 #include <assert.h>
@@ -55,8 +55,13 @@ memset_char4 (gfc_char4_t *b, gfc_char4_t c, size_t len)
 int
 memcmp_char4 (const void *a, const void *b, size_t len)
 {
+#ifdef _WIN32
+  const GFC_UINTEGER_2 *pa = a;
+  const GFC_UINTEGER_2 *pb = b;
+#else
   const GFC_UINTEGER_4 *pa = a;
   const GFC_UINTEGER_4 *pb = b;
+#endif
   while (len-- > 0)
     {
       if (*pa != *pb)

@@ -266,15 +266,15 @@ free_format_data (format_data *fmt)
     return;
 
   /* Free vlist descriptors in the fnode_array if one was allocated.  */
-  for (fnp = fmt->array.array; fnp < &fmt->array.array[FARRAY_SIZE] &&
-       fnp->format != FMT_NONE; fnp++)
-    if (fnp->format == FMT_DT)
+  for (fnp = fmt->array.array; fnp < &fmt->array.array[FARRAY_SIZE] && fnp->format != FMT_NONE; fnp++)
+  {
+     if (fnp->format == FMT_DT)
 	{
 	  if (GFC_DESCRIPTOR_DATA(fnp->u.udf.vlist))
 	    free (GFC_DESCRIPTOR_DATA(fnp->u.udf.vlist));
 	  free (fnp->u.udf.vlist);
 	}
-
+  }
   for (fa = fmt->array.next; fa; fa = fa_next)
     {
       fa_next = fa->next;
@@ -465,7 +465,7 @@ format_lex (format_data *fmt)
 	  if (c == -1)
 	    {
 	      token = FMT_BADSTRING;
-	      fmt->error = bad_string;
+	      fmt->error = _(bad_string);
 	      break;
 	    }
 
@@ -476,7 +476,7 @@ format_lex (format_data *fmt)
 	      if (c == -1)
 		{
 		  token = FMT_BADSTRING;
-		  fmt->error = bad_string;
+		  fmt->error = _(bad_string);
 		  break;
 		}
 
@@ -630,7 +630,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       t = format_lex (fmt);
       if (t != FMT_LPAREN)
 	{
-	  fmt->error = "Left parenthesis required after '*'";
+	  fmt->error = _("Left parenthesis required after '*'");
 	  goto finished;
 	}
       get_fnode (fmt, &head, &tail, FMT_LPAREN);
@@ -695,7 +695,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       t = format_lex (fmt);
       if (t != FMT_P)
 	{
-	  fmt->error = "Expected P edit descriptor in format";
+	  fmt->error = _("Expected P edit descriptor in format");
 	  goto finished;
 	}
 
@@ -715,7 +715,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       if (t != FMT_COMMA && t != FMT_RPAREN && t != FMT_SLASH
 	  && t != FMT_POSINT)
 	{
-	  fmt->error = "Comma required after P descriptor";
+	  fmt->error = _("Comma required after P descriptor");
 	  goto finished;
 	}
 
@@ -723,7 +723,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       goto optional_comma;
 
     case FMT_P:		/* P and X require a prior number */
-      fmt->error = "P descriptor requires leading scale factor";
+      fmt->error = _("P descriptor requires leading scale factor");
       goto finished;
 
     case FMT_X:
@@ -759,16 +759,14 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
     case FMT_RP:
     case FMT_RU:
     case FMT_RZ:
-      notify_std (&dtp->common, GFC_STD_F2003, "Fortran 2003: Round "
-		  "descriptor not allowed");
+      notify_std (&dtp->common, FTN_STD_F2003, _("Fortran 2003: Round descriptor not allowed"));
       get_fnode (fmt, &head, &tail, t);
       tail->repeat = 1;
       goto between_desc;
 
     case FMT_DC:
     case FMT_DP:
-      notify_std (&dtp->common, GFC_STD_F2003, "Fortran 2003: DC or DP "
-		  "descriptor not allowed");
+      notify_std (&dtp->common, FTN_STD_F2003, _("Fortran 2003: DC or DP descriptor not allowed"));
     /* Fall through.  */
     case FMT_S:
     case FMT_SS:
@@ -793,7 +791,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
     case FMT_DOLLAR:
       get_fnode (fmt, &head, &tail, FMT_DOLLAR);
       tail->repeat = 1;
-      notify_std (&dtp->common, GFC_STD_GNU, "Extension: $ descriptor");
+      notify_std (&dtp->common, FTN_STD_GNU, _("Extension: $ descriptor"));
       goto between_desc;
 
     case FMT_T:
@@ -802,7 +800,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       t2 = format_lex (fmt);
       if (t2 != FMT_POSINT)
 	{
-	  fmt->error = posint_required;
+	  fmt->error = _(posint_required);
 	  goto finished;
 	}
       get_fnode (fmt, &head, &tail, t);
@@ -831,7 +829,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       get_fnode (fmt, &head, &tail, FMT_STRING);
       if (fmt->format_string_len < 1)
 	{
-	  fmt->error = bad_hollerith;
+	  fmt->error = _(bad_hollerith);
 	  goto finished;
 	}
 
@@ -845,7 +843,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       goto between_desc;
 
     case FMT_END:
-      fmt->error = unexpected_end;
+      fmt->error = _(unexpected_end);
       goto finished;
 
     case FMT_BADSTRING:
@@ -855,7 +853,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       goto finished;
 
     default:
-      fmt->error = unexpected_element;
+      fmt->error = _(unexpected_element);
       goto finished;
     }
 
@@ -872,20 +870,18 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	{
 	  if (t == FMT_ZERO)
 	    {
-	      if (notification_std(GFC_STD_GNU) == NOTIFICATION_ERROR)
+	      if (notification_std(FTN_STD_GNU) == NOTIFICATION_ERROR)
 		{
-		  fmt->error = "Extension: Zero width after L descriptor";
+		  fmt->error = _("Extension: Zero width after L descriptor");
 		  goto finished;
 		}
 	      else
-		notify_std (&dtp->common, GFC_STD_GNU,
-			    "Zero width after L descriptor");
+		notify_std (&dtp->common, FTN_STD_GNU, _("Zero width after L descriptor"));
 	    }
 	  else
 	    {
 	      fmt->saved_token = t;
-	      notify_std (&dtp->common, GFC_STD_GNU,
-			  "Positive width required with L descriptor");
+	      notify_std (&dtp->common, FTN_STD_GNU, _("Positive width required with L descriptor"));
 	    }
 	  fmt->value = 1;	/* Default width */
 	}
@@ -899,7 +895,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       t = format_lex (fmt);
       if (t == FMT_ZERO)
 	{
-	  fmt->error = zero_width;
+	  fmt->error = _(zero_width);
 	  goto finished;
 	}
 
@@ -928,10 +924,10 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       if (t == FMT_G && u == FMT_ZERO)
 	{
 	  *seen_dd = true;
-	  if (notification_std (GFC_STD_F2008) == NOTIFICATION_ERROR
+	  if (notification_std (FTN_STD_F2008) == NOTIFICATION_ERROR
 	      || dtp->u.p.mode == READING)
 	    {
-	      fmt->error = zero_width;
+	      fmt->error = _(zero_width);
 	      goto finished;
 	    }
 	  tail->u.real.w = 0;
@@ -945,7 +941,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	  u = format_lex (fmt);
 	  if (u != FMT_POSINT)
 	    {
-	      fmt->error = posint_required;
+	      fmt->error = _(posint_required);
 	      goto finished;
 	    }
 	  tail->u.real.d = fmt->value;
@@ -956,13 +952,13 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	  *seen_dd = true;
 	  if (u != FMT_POSINT && u != FMT_ZERO)
 	    {
-	      fmt->error = nonneg_required;
+	      fmt->error = _(nonneg_required);
 	      goto finished;
 	    }
 	}
       else if (u != FMT_POSINT)
 	{
-	  fmt->error = posint_required;
+	  fmt->error = _(posint_required);
 	  goto finished;
 	}
 
@@ -975,7 +971,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	     allowed if -std=legacy, otherwise an error occurs.  */
 	  if (compile_options.warn_std != 0)
 	    {
-	      fmt->error = period_required;
+	      fmt->error = _(period_required);
 	      goto finished;
 	    }
 	  fmt->saved_token = t;
@@ -987,7 +983,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       t = format_lex (fmt);
       if (t != FMT_ZERO && t != FMT_POSINT)
 	{
-	  fmt->error = nonneg_required;
+	  fmt->error = _(nonneg_required);
 	  goto finished;
 	}
 
@@ -1009,7 +1005,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	  t = format_lex (fmt);
 	  if (t != FMT_POSINT)
 	    {
-	      fmt->error = "Positive exponent width required in format";
+	      fmt->error = _("Positive exponent width required in format");
 	      goto finished;
 	    }
 
@@ -1045,7 +1041,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	  t = format_lex (fmt);
 	  if (t != FMT_POSINT)
 	    {
-	      fmt->error = posint_required;
+	      fmt->error = _(posint_required);
 	      goto finished;
 	    }
 	  /* Save the positive integer value.  */
@@ -1063,7 +1059,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	      memcpy (GFC_DESCRIPTOR_DATA(vp), temp, i * sizeof(GFC_INTEGER_4));
 	      break;
 	    }
-	  fmt->error = unexpected_element;
+	  fmt->error = _(unexpected_element);
 	  goto finished;
 	}
       fmt->saved_token = t;
@@ -1071,7 +1067,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
     case FMT_H:
       if (repeat > fmt->format_string_len)
 	{
-	  fmt->error = bad_hollerith;
+	  fmt->error = _(bad_hollerith);
 	  goto finished;
 	}
 
@@ -1099,7 +1095,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	{
 	  if (t != FMT_POSINT)
 	    {
-	      fmt->error = posint_required;
+	      fmt->error = _(posint_required);
 	      goto finished;
 	    }
 	}
@@ -1107,7 +1103,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	{
 	  if (t != FMT_ZERO && t != FMT_POSINT)
 	    {
-	      fmt->error = nonneg_required;
+	      fmt->error = _(nonneg_required);
 	      goto finished;
 	    }
 	}
@@ -1125,7 +1121,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 	  t = format_lex (fmt);
 	  if (t != FMT_ZERO && t != FMT_POSINT)
 	    {
-	      fmt->error = nonneg_required;
+	      fmt->error = _(nonneg_required);
 	      goto finished;
 	    }
 
@@ -1134,14 +1130,14 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
 
       if (tail->u.integer.w != 0 && tail->u.integer.m > tail->u.integer.w)
 	{
-	  fmt->error = "Minimum digits exceeds field width";
+	  fmt->error = _("Minimum digits exceeds field width");
 	  goto finished;
 	}
 
       break;
 
     default:
-      fmt->error = unexpected_element;
+      fmt->error = _(unexpected_element);
       goto finished;
     }
 
@@ -1163,7 +1159,7 @@ parse_format_list (st_parameter_dt *dtp, bool *seen_dd)
       goto optional_comma;
 
     case FMT_END:
-      fmt->error = unexpected_end;
+      fmt->error = _(unexpected_end);
       goto finished;
 
     default:
@@ -1218,7 +1214,7 @@ format_error (st_parameter_dt *dtp, const fnode *f, const char *message)
   else                /* This should not happen.  */
     p = dtp->format;
 
-  if (message == unexpected_element)
+  if (message == _(unexpected_element))
     snprintf (buffer, BUFLEN, message, fmt->error_element);
   else
     snprintf (buffer, BUFLEN, "%s\n", message);
@@ -1348,7 +1344,7 @@ parse_format (st_parameter_dt *dtp)
   if (format_lex (fmt) == FMT_LPAREN)
     fmt->array.array[0].u.child = parse_format_list (dtp, &seen_data_desc);
   else
-    fmt->error = "Missing initial left parenthesis in format";
+    fmt->error = _("Missing initial left parenthesis in format");
 
   if (format_cache_ok)
     save_parsed_format (dtp);
@@ -1451,7 +1447,7 @@ next_format (st_parameter_dt *dtp)
       f = next_format0 (&fmt->array.array[0]);
       if (f == NULL)
 	{
-	  format_error (dtp, NULL, reversion_error);
+	  format_error (dtp, NULL, _(reversion_error));
 	  return NULL;
 	}
 

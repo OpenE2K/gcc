@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_8)
 #ifdef HAVE_CCOS
 
-elemental function _gfortran_specific__cos_c8 (parm)
+elemental function _lfortran_specific__cos_c8 (parm)
    complex (kind=8), intent (in) :: parm
-   complex (kind=8) :: _gfortran_specific__cos_c8
+   complex (kind=8) :: _lfortran_specific__cos_c8
 
-   _gfortran_specific__cos_c8 = cos (parm)
+   _lfortran_specific__cos_c8 = cos (parm)
 end function
 
 #endif

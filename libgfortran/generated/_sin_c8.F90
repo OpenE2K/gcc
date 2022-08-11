@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_8)
 #ifdef HAVE_CSIN
 
-elemental function _gfortran_specific__sin_c8 (parm)
+elemental function _lfortran_specific__sin_c8 (parm)
    complex (kind=8), intent (in) :: parm
-   complex (kind=8) :: _gfortran_specific__sin_c8
+   complex (kind=8) :: _lfortran_specific__sin_c8
 
-   _gfortran_specific__sin_c8 = sin (parm)
+   _lfortran_specific__sin_c8 = sin (parm)
 end function
 
 #endif

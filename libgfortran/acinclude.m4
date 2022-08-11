@@ -298,60 +298,10 @@ AC_DEFUN([LIBGFOR_CHECK_FLOAT128], [
   if test "x$libgfor_cv_have_float128" = xyes; then
     AC_DEFINE(HAVE_FLOAT128, 1, [Define if have a usable __float128 type.])
 
-    dnl Check whether -Wl,--as-needed resp. -Wl,-zignore is supported
-    dnl 
-    dnl Turn warnings into error to avoid testsuite breakage.  So enable
-    dnl AC_LANG_WERROR, but there's currently (autoconf 2.64) no way to turn
-    dnl it off again.  As a workaround, save and restore werror flag like
-    dnl AC_PATH_XTRA.
-    dnl Cf. http://gcc.gnu.org/ml/gcc-patches/2010-05/msg01889.html
-    ac_xsave_[]_AC_LANG_ABBREV[]_werror_flag=$ac_[]_AC_LANG_ABBREV[]_werror_flag
-    AC_CACHE_CHECK([whether --as-needed/-z ignore works],
-      [libgfor_cv_have_as_needed],
-      [
-      # Test for native Solaris options first.
-      # No whitespace after -z to pass it through -Wl.
-      libgfor_cv_as_needed_option="-zignore"
-      libgfor_cv_no_as_needed_option="-zrecord"
-      save_LDFLAGS="$LDFLAGS"
-      LDFLAGS="$LDFLAGS -Wl,$libgfor_cv_as_needed_option -lm -Wl,$libgfor_cv_no_as_needed_option"
-      libgfor_cv_have_as_needed=no
-      AC_LANG_WERROR
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([])],
-		     [libgfor_cv_have_as_needed=yes],
-		     [libgfor_cv_have_as_needed=no])
-      LDFLAGS="$save_LDFLAGS"
-      if test "x$libgfor_cv_have_as_needed" = xno; then
-	libgfor_cv_as_needed_option="--as-needed"
-	libgfor_cv_no_as_needed_option="--no-as-needed"
-	save_LDFLAGS="$LDFLAGS"
-	LDFLAGS="$LDFLAGS -Wl,$libgfor_cv_as_needed_option -lm -Wl,$libgfor_cv_no_as_needed_option"
-	libgfor_cv_have_as_needed=no
-	AC_LANG_WERROR
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([])],
-		       [libgfor_cv_have_as_needed=yes],
-		       [libgfor_cv_have_as_needed=no])
-	LDFLAGS="$save_LDFLAGS"
-      fi
-      ac_[]_AC_LANG_ABBREV[]_werror_flag=$ac_xsave_[]_AC_LANG_ABBREV[]_werror_flag
-    ])
-
-    dnl For static libgfortran linkage, depend on libquadmath only if needed.
-    if test "x$libgfor_cv_have_as_needed" = xyes; then
-      LIBQUADSPEC="%{static-libgfortran:$libgfor_cv_as_needed_option} -lquadmath %{static-libgfortran:$libgfor_cv_no_as_needed_option}"
-    else
       LIBQUADSPEC="-lquadmath"
-    fi
-    if test -f ../libquadmath/libquadmath.la; then
-      LIBQUADLIB=../libquadmath/libquadmath.la
-      LIBQUADLIB_DEP=../libquadmath/libquadmath.la
-      LIBQUADINCLUDE='-I$(srcdir)/../libquadmath'
-    else
       LIBQUADLIB="-lquadmath"
       LIBQUADLIB_DEP=
       LIBQUADINCLUDE=
-    fi
-  fi
   else
     # for --disable-quadmath
     LIBQUADLIB=

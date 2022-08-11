@@ -27,7 +27,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 /* For rand_s.  */
 #define _CRT_RAND_S
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <gthr.h>
 #include <string.h>
 

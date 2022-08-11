@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_4)
 #ifdef HAVE_CSQRTF
 
-elemental function _gfortran_specific__sqrt_c4 (parm)
+elemental function _lfortran_specific__sqrt_c4 (parm)
    complex (kind=4), intent (in) :: parm
-   complex (kind=4) :: _gfortran_specific__sqrt_c4
+   complex (kind=4) :: _lfortran_specific__sqrt_c4
 
-   _gfortran_specific__sqrt_c4 = sqrt (parm)
+   _lfortran_specific__sqrt_c4 = sqrt (parm)
 end function
 
 #endif

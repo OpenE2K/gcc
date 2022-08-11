@@ -23,10 +23,10 @@
 !<http://www.gnu.org/licenses/>.
 
 
-elemental function _gfortran_specific__dprod_r8 (p1, p2)
+elemental function _lfortran_specific__dprod_r8 (p1, p2)
    implicit none
    real (kind=4), intent (in) :: p1, p2
-   real (kind=8) :: _gfortran_specific__dprod_r8
+   real (kind=8) :: _lfortran_specific__dprod_r8
 
-   _gfortran_specific__dprod_r8 = dprod (p1, p2)
+   _lfortran_specific__dprod_r8 = dprod (p1, p2)
 end function

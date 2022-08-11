@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 #if defined (HAVE_GFC_LOGICAL_16)
@@ -97,7 +97,7 @@ all_l16 (gfc_array_l16 * const restrict retarray,
         }
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -113,8 +113,7 @@ all_l16 (gfc_array_l16 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " ALL intrinsic: is %ld, should be %ld",
+	runtime_error ("rank of return array incorrect in ALL intrinsic: is %ld, should be %ld",
 		       (long int) GFC_DESCRIPTOR_RANK (retarray),
 		       (long int) rank);
 
@@ -126,10 +125,8 @@ all_l16 (gfc_array_l16 * const restrict retarray,
 
 	      ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,n);
 	      if (extent[n] != ret_extent)
-		runtime_error ("Incorrect extent in return value of"
-			       " ALL intrinsic in dimension %d:"
-			       " is %ld, should be %ld", (int) n + 1,
-			       (long int) ret_extent, (long int) extent[n]);
+		    runtime_error ("Incorrect extent in return value of ALL intrinsic in dimension %d: is %ld, should be %ld",
+		       (int) n + 1, (long int) ret_extent, (long int) extent[n]);
 	    }
 	}
     }

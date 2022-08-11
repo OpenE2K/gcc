@@ -118,14 +118,14 @@ build_float_string (st_parameter_dt *dtp, const fnode *f, char *buffer,
   char *put;
   char *digits;
   int e, w, d, p, i;
-  char expchar, rchar;
+  char expchar = ' ', rchar;
   format_token ft;
   /* Number of digits before the decimal point.  */
-  int nbefore;
+  int nbefore = 0;
   /* Number of zeros after the decimal point.  */
-  int nzero;
+  int nzero = 0;
   /* Number of digits after the decimal point.  */
-  int nafter;
+  int nafter = 0;
   int leadzero;
   int nblanks;
   int ndigits, edigits;
@@ -135,6 +135,7 @@ build_float_string (st_parameter_dt *dtp, const fnode *f, char *buffer,
   w = f->u.real.w;
   d = f->u.real.d;
   p = dtp->u.p.scale_factor;
+  *len = 0;
 
   rchar = '5';
 
@@ -871,10 +872,10 @@ static int
 determine_en_precision (st_parameter_dt *dtp, const fnode *f, 
 			const char *source, int len)
 {
-  int nprinted;
+  int nprinted = 0;
   char buffer[10];
   const size_t size = 10;
-  int nbefore; /* digits before decimal point - 1.  */
+  int nbefore = 0; /* digits before decimal point - 1.  */
 
   switch (len)
     {
@@ -977,7 +978,7 @@ determine_en_precision (st_parameter_dt *dtp, const fnode *f,
       temp = 0.1 * r_sc;\
       if ((m > 0.0 && ((m < temp) || (r >= (exp_d - m))))\
 	  || ((m == 0.0) && !(compile_options.allow_std\
-			      & (GFC_STD_F2003 | GFC_STD_F2008)))\
+			      & (FTN_STD_F2003 | FTN_STD_F2008)))\
 	  ||  d == 0)\
 	{ \
 	  newf.format = FMT_E;\

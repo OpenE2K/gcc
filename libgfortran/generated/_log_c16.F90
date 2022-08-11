@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_16)
 #ifdef HAVE_CLOGL
 
-elemental function _gfortran_specific__log_c16 (parm)
+elemental function _lfortran_specific__log_c16 (parm)
    complex (kind=16), intent (in) :: parm
-   complex (kind=16) :: _gfortran_specific__log_c16
+   complex (kind=16) :: _lfortran_specific__log_c16
 
-   _gfortran_specific__log_c16 = log (parm)
+   _lfortran_specific__log_c16 = log (parm)
 end function
 
 #endif

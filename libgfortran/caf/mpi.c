@@ -53,7 +53,7 @@ static void
 caf_runtime_error (const char *message, ...)
 {
   va_list ap;
-  fprintf (stderr, "Fortran runtime error on image %d: ", caf_this_image);
+  fprintf (stderr, _("Fortran runtime error on image %d: "), caf_this_image);
   va_start (ap, message);
   vfprintf (stderr, message, ap);
   va_end (ap);
@@ -75,7 +75,7 @@ caf_runtime_error (const char *message, ...)
    libaray is initialized.  */
 
 void
-_gfortran_caf_init (int *argc, char ***argv)
+_lfortran_caf_init (int *argc, char ***argv)
 {
   if (caf_num_images == 0)
     {
@@ -95,7 +95,7 @@ _gfortran_caf_init (int *argc, char ***argv)
 /* Finalize coarray program.   */
 
 void
-_gfortran_caf_finalize (void)
+_lfortran_caf_finalize (void)
 {
   while (caf_static_list != NULL)
     {
@@ -115,14 +115,14 @@ _gfortran_caf_finalize (void)
 
 
 int
-_gfortran_caf_this_image (int distance __attribute__ ((unused)))
+_lfortran_caf_this_image (int distance __attribute__ ((unused)))
 {
   return caf_this_image;
 }
 
 
 int
-_gfortran_caf_num_images (int distance __attribute__ ((unused)),
+_lfortran_caf_num_images (int distance __attribute__ ((unused)),
 			  int failed __attribute__ ((unused)))
 {
   return caf_num_images;
@@ -130,7 +130,7 @@ _gfortran_caf_num_images (int distance __attribute__ ((unused)),
 
 
 void *
-_gfortran_caf_register (size_t size, caf_register_t type, caf_token_t *token,
+_lfortran_caf_register (size_t size, caf_register_t type, caf_token_t *token,
 			int *stat, char *errmsg, int errmsg_len,
 			int num_alloc_comps __attribute__ ((unused)))
 {
@@ -142,7 +142,7 @@ _gfortran_caf_register (size_t size, caf_register_t type, caf_token_t *token,
 
   /* Start MPI if not already started.  */
   if (caf_num_images == 0)
-    _gfortran_caf_init (NULL, NULL);
+    _lfortran_caf_init (NULL, NULL);
 
   /* Token contains only a list of pointers.  */
   local = malloc (size);
@@ -180,9 +180,9 @@ error:
     char *msg;
 
     if (caf_is_finalized)
-      msg = "Failed to allocate coarray - there are stopped images";
+      msg = _("Failed to allocate coarray - there are stopped images");
     else
-      msg = "Failed to allocate coarray";
+      msg = _("Failed to allocate coarray");
 
     if (stat)
       {
@@ -205,12 +205,11 @@ error:
 
 
 void
-_gfortran_caf_deregister (caf_token_t *token, int *stat, char *errmsg, int errmsg_len)
+_lfortran_caf_deregister (caf_token_t *token, int *stat, char *errmsg, int errmsg_len)
 {
   if (unlikely (caf_is_finalized))
     {
-      const char msg[] = "Failed to deallocate coarray - "
-			  "there are stopped images";
+      const char msg[] = _("Failed to deallocate coarray - there are stopped images");
       if (stat)
 	{
 	  *stat = STAT_STOPPED_IMAGE;
@@ -228,7 +227,7 @@ _gfortran_caf_deregister (caf_token_t *token, int *stat, char *errmsg, int errms
       caf_runtime_error (msg);
     }
 
-  _gfortran_caf_sync_all (NULL, NULL, 0);
+  _lfortran_caf_sync_all (NULL, NULL, 0);
 
   if (stat)
     *stat = 0;
@@ -239,7 +238,7 @@ _gfortran_caf_deregister (caf_token_t *token, int *stat, char *errmsg, int errms
 
 
 void
-_gfortran_caf_sync_all (int *stat, char *errmsg, int errmsg_len)
+_lfortran_caf_sync_all (int *stat, char *errmsg, int errmsg_len)
 {
   int ierr;
 
@@ -255,9 +254,9 @@ _gfortran_caf_sync_all (int *stat, char *errmsg, int errmsg_len)
     {
       char *msg;
       if (caf_is_finalized)
-	msg = "SYNC ALL failed - there are stopped images";
+	msg = _("SYNC ALL failed - there are stopped images");
       else
-	msg = "SYNC ALL failed";
+	msg = _("SYNC ALL failed");
 
       if (errmsg_len > 0)
 	{
@@ -277,7 +276,7 @@ _gfortran_caf_sync_all (int *stat, char *errmsg, int errmsg_len)
    SYNC IMAGES([]) has count == 0. Note further that SYNC IMAGES(*)
    is not equivalent to SYNC ALL. */
 void
-_gfortran_caf_sync_images (int count, int images[], int *stat, char *errmsg,
+_lfortran_caf_sync_images (int count, int images[], int *stat, char *errmsg,
 			   int errmsg_len)
 {
   int ierr;
@@ -295,8 +294,7 @@ _gfortran_caf_sync_images (int count, int images[], int *stat, char *errmsg,
     for (i = 0; i < count; i++)
       if (images[i] < 1 || images[i] > caf_num_images)
 	{
-	  fprintf (stderr, "COARRAY ERROR: Invalid image index %d to SYNC "
-		   "IMAGES", images[i]);
+	  fprintf (stderr, _("COARRAY ERROR: Invalid image index %d to SYNC IMAGES"), images[i]);
 	  error_stop (1);
 	}
   }
@@ -306,7 +304,7 @@ _gfortran_caf_sync_images (int count, int images[], int *stat, char *errmsg,
      mapped to MPI communicators. Thus, exist early with an error message.  */
   if (count > 0)
     {
-      fprintf (stderr, "COARRAY ERROR: SYNC IMAGES not yet implemented");
+      fprintf (stderr, _("COARRAY ERROR: SYNC IMAGES not yet implemented"));
       error_stop (1);
     }
 
@@ -323,9 +321,9 @@ _gfortran_caf_sync_images (int count, int images[], int *stat, char *errmsg,
     {
       char *msg;
       if (caf_is_finalized)
-	msg = "SYNC IMAGES failed - there are stopped images";
+	msg = _("SYNC IMAGES failed - there are stopped images");
       else
-	msg = "SYNC IMAGES failed";
+	msg = _("SYNC IMAGES failed");
 
       if (errmsg_len > 0)
 	{
@@ -358,7 +356,7 @@ error_stop (int error)
 /* ERROR STOP function for string arguments.  */
 
 void
-_gfortran_caf_error_stop_str (const char *string, int32_t len)
+_lfortran_caf_error_stop_str (const char *string, int32_t len)
 {
   fputs ("ERROR STOP ", stderr);
   while (len--)
@@ -372,7 +370,7 @@ _gfortran_caf_error_stop_str (const char *string, int32_t len)
 /* ERROR STOP function for numerical arguments.  */
 
 void
-_gfortran_caf_error_stop (int32_t error)
+_lfortran_caf_error_stop (int32_t error)
 {
   fprintf (stderr, "ERROR STOP %d\n", error);
   error_stop (error);

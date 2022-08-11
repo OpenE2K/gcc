@@ -22,7 +22,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 #include <string.h>
 #include <strings.h>
@@ -37,20 +37,9 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
    provided. */
 
 #ifdef FALLBACK_SECURE_GETENV
-
-#if SUPPORTS_WEAKREF && defined(HAVE___SECURE_GETENV)
-static char* weak_secure_getenv (const char*)
-  __attribute__((__weakref__("__secure_getenv")));
-#endif
-
 char *
 secure_getenv (const char *name)
 {
-#if SUPPORTS_WEAKREF && defined(HAVE___SECURE_GETENV)
-  if (weak_secure_getenv)
-    return weak_secure_getenv (name);
-#endif
-
   if ((getuid () == geteuid ()) && (getgid () == getegid ()))
     return getenv (name);
   else

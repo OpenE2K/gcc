@@ -23,11 +23,11 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 
-#if defined (HAVE_GFC_REAL_16)
+#if defined (HAVE_GFC_REAL_16) && !defined(GFC_REAL_16_IS_FLOAT128) && defined(HAVE_FLOAT128)
 
 void
 internal_unpack_r16 (gfc_array_r16 * d, const GFC_REAL_16 * src)

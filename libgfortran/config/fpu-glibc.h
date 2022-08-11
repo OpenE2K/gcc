@@ -27,14 +27,16 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
    feenableexcept function in fenv.h to set individual exceptions
    (there's nothing to do that in C99).  */
 
+
 #ifdef HAVE_FENV_H
+#define __USE_GNU 
+
 #include <fenv.h>
 #endif
 
-
 /* Check we can actually store the FPU state in the allocated size.  */
-_Static_assert (sizeof(fenv_t) <= (size_t) GFC_FPE_STATE_BUFFER_SIZE,
-		"GFC_FPE_STATE_BUFFER_SIZE is too small");
+//_Static_assert (sizeof(fenv_t) <= (size_t) GFC_FPE_STATE_BUFFER_SIZE,
+//		"GFC_FPE_STATE_BUFFER_SIZE is too small");
 
 
 void set_fpu_trap_exceptions (int trap, int notrap)
@@ -163,38 +165,32 @@ void set_fpu (void)
 {
 #ifndef FE_INVALID
   if (options.fpe & GFC_FPE_INVALID)
-    estr_write ("Fortran runtime warning: IEEE 'invalid operation' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'invalid operation' exception not supported.\n");
 #endif
 
 #ifndef FE_DENORMAL
   if (options.fpe & GFC_FPE_DENORMAL)
-    estr_write ("Fortran runtime warning: Floating point 'denormal operand' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: Floating point 'denormal operand' exception not supported.\n");
 #endif
 
 #ifndef FE_DIVBYZERO
   if (options.fpe & GFC_FPE_ZERO)
-    estr_write ("Fortran runtime warning: IEEE 'division by zero' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'division by zero' exception not supported.\n");
 #endif
 
 #ifndef FE_OVERFLOW
   if (options.fpe & GFC_FPE_OVERFLOW)
-    estr_write ("Fortran runtime warning: IEEE 'overflow' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'overflow' exception not supported.\n");
 #endif
 
 #ifndef FE_UNDERFLOW
   if (options.fpe & GFC_FPE_UNDERFLOW)
-    estr_write ("Fortran runtime warning: IEEE 'underflow' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'underflow' exception not supported.\n");
 #endif
 
 #ifndef FE_INEXACT
   if (options.fpe & GFC_FPE_INEXACT)
-    estr_write ("Fortran runtime warning: IEEE 'inexact' "
-	        "exception not supported.\n");
+    estr_write ("Fortran runtime warning: IEEE 'inexact' exception not supported.\n");
 #endif
 
   set_fpu_trap_exceptions (options.fpe, 0);

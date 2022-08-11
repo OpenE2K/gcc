@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_10)
 #ifdef HAVE_SINL
 
-elemental function _gfortran_specific__sin_r10 (parm)
+elemental function _lfortran_specific__sin_r10 (parm)
    real (kind=10), intent (in) :: parm
-   real (kind=10) :: _gfortran_specific__sin_r10
+   real (kind=10) :: _lfortran_specific__sin_r10
 
-   _gfortran_specific__sin_r10 = sin (parm)
+   _lfortran_specific__sin_r10 = sin (parm)
 end function
 
 #endif

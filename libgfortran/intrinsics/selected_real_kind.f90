@@ -22,10 +22,10 @@
 !see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 !<http://www.gnu.org/licenses/>.
 
-function _gfortran_selected_real_kind2008 (p, r, rdx)
+function _lfortran_selected_real_kind2008 (p, r, rdx)
   implicit none
   integer, optional, intent (in) :: p, r, rdx
-  integer :: _gfortran_selected_real_kind2008
+  integer :: _lfortran_selected_real_kind2008
   integer :: i, p2, r2, radix2
   logical :: found_p, found_r, found_radix
   ! Real kind_precision_range table
@@ -38,7 +38,7 @@ function _gfortran_selected_real_kind2008 (p, r, rdx)
 
   include "selected_real_kind.inc"
 
-  _gfortran_selected_real_kind2008 = 0
+  _lfortran_selected_real_kind2008 = 0
   p2 = 0
   r2 = 0
   radix2 = 0
@@ -60,36 +60,54 @@ function _gfortran_selected_real_kind2008 (p, r, rdx)
     if (p2 <= real_infos (i) % precision   &
         .and. r2 <= real_infos (i) % range &
         .and. radix2 <= real_infos (i) % radix) then
-      _gfortran_selected_real_kind2008 = real_infos (i) % kind
+      _lfortran_selected_real_kind2008 = real_infos (i) % kind
       return
     end if
   end do
 
   if (found_radix .and. found_r .and. .not. found_p) then
-    _gfortran_selected_real_kind2008 = -1
+    _lfortran_selected_real_kind2008 = -1
   elseif (found_radix .and. found_p .and. .not. found_r) then
-    _gfortran_selected_real_kind2008 = -2
+    _lfortran_selected_real_kind2008 = -2
   elseif (found_radix .and. .not. found_p .and. .not. found_r) then
-    _gfortran_selected_real_kind2008 = -3
+    _lfortran_selected_real_kind2008 = -3
   elseif (found_radix) then
-    _gfortran_selected_real_kind2008 = -4
+    _lfortran_selected_real_kind2008 = -4
   else
-    _gfortran_selected_real_kind2008 = -5
+    _lfortran_selected_real_kind2008 = -5
   end if
-end function _gfortran_selected_real_kind2008
+end function _lfortran_selected_real_kind2008
 
-function _gfortran_selected_real_kind (p, r)
+function _lfortran_selected_real_kind (p, r)
   implicit none
   integer, optional, intent (in) :: p, r
-  integer :: _gfortran_selected_real_kind
+  integer :: _lfortran_selected_real_kind
 
   interface
-    function _gfortran_selected_real_kind2008 (p, r, rdx)
+    function _lfortran_selected_real_kind2008 (p, r, rdx)
       implicit none
       integer, optional, intent (in) :: p, r, rdx
-      integer :: _gfortran_selected_real_kind2008
-    end function _gfortran_selected_real_kind2008
+      integer :: _lfortran_selected_real_kind2008
+    end function _lfortran_selected_real_kind2008
   end interface
 
-  _gfortran_selected_real_kind = _gfortran_selected_real_kind2008 (p, r)
+  _lfortran_selected_real_kind = _lfortran_selected_real_kind2008 (p, r)
+end function
+
+! the next function is added, becase we compile this file with gfortran
+
+function _gfortran_selected_real_kind2008 (p, r, rdx)
+  implicit none
+  integer, optional, intent (in) :: p, r, rdx
+  integer :: _gfortran_selected_real_kind2008
+
+  interface
+    function _lfortran_selected_real_kind2008 (p, r, rdx)
+      implicit none
+      integer, optional, intent (in) :: p, r, rdx
+      integer :: _lfortran_selected_real_kind2008
+    end function _lfortran_selected_real_kind2008
+  end interface
+
+  _gfortran_selected_real_kind2008 = _lfortran_selected_real_kind2008 (p, r, rdx)
 end function

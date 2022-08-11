@@ -25,7 +25,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #include "config.h"
 
 #define C99_PROTOS_H WE_DONT_WANT_PROTOS_NOW
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 /* On a C99 system "I" (with I*I = -1) should be defined in complex.h;
    if not, we define a fallback version here.  */

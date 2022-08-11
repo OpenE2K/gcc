@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 #if defined(HAVE_SYS_STAT_H)
 
@@ -59,7 +59,6 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 
    A return value of 0 indicates success, -1 an error of chmod() while 1
    indicates a mode parsing error.  */
-
 
 static int
 chmod_internal (char *file, char *mode, gfc_charlen_type mode_len)

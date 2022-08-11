@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 #if defined (HAVE_GFC_INTEGER_1) && defined (HAVE_GFC_INTEGER_4)
@@ -93,7 +93,7 @@ maxloc1_4_i1 (gfc_array_i4 * const restrict retarray,
 	}
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -109,14 +109,12 @@ maxloc1_4_i1 (gfc_array_i4 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " MAXLOC intrinsic: is %ld, should be %ld",
+	runtime_error ("rank of return array incorrect in MAXLOC intrinsic: is %ld, should be %ld",
 		       (long int) (GFC_DESCRIPTOR_RANK (retarray)),
 		       (long int) rank);
 
       if (unlikely (compile_options.bounds_check))
-	bounds_ifunction_return ((array_t *) retarray, extent,
-				 "return value", "MAXLOC");
+	bounds_ifunction_return ((array_t *) retarray, extent, _("return value"), "MAXLOC");
     }
 
   for (n = 0; n < rank; n++)
@@ -293,7 +291,7 @@ mmaxloc1_4_i1 (gfc_array_i4 * const restrict retarray,
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       if (alloc_size == 0)
 	{
@@ -312,10 +310,8 @@ mmaxloc1_4_i1 (gfc_array_i4 * const restrict retarray,
 
       if (unlikely (compile_options.bounds_check))
 	{
-	  bounds_ifunction_return ((array_t *) retarray, extent,
-				   "return value", "MAXLOC");
-	  bounds_equal_extents ((array_t *) mask, (array_t *) array,
-	  			"MASK argument", "MAXLOC");
+	  bounds_ifunction_return ((array_t *) retarray, extent, _("return value"), "MAXLOC");
+	  bounds_equal_extents ((array_t *) mask, (array_t *) array, _("MASK argument"), "MAXLOC");
 	}
     }
 
@@ -478,7 +474,7 @@ smaxloc1_4_i1 (gfc_array_i4 * const restrict retarray,
 	}
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -494,8 +490,7 @@ smaxloc1_4_i1 (gfc_array_i4 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " MAXLOC intrinsic: is %ld, should be %ld",
+	runtime_error ("rank of return array incorrect in MAXLOC intrinsic: is %ld, should be %ld",
 		       (long int) (GFC_DESCRIPTOR_RANK (retarray)),
 		       (long int) rank);
 
@@ -507,10 +502,8 @@ smaxloc1_4_i1 (gfc_array_i4 * const restrict retarray,
 
 	      ret_extent = GFC_DESCRIPTOR_EXTENT(retarray,n);
 	      if (extent[n] != ret_extent)
-		runtime_error ("Incorrect extent in return value of"
-			       " MAXLOC intrinsic in dimension %ld:"
-			       " is %ld, should be %ld", (long int) n + 1,
-			       (long int) ret_extent, (long int) extent[n]);
+		runtime_error ("Incorrect extent in return value of MAXLOC intrinsic in dimension %ld: is %ld, should be %ld",
+		           (long int) n + 1, (long int) ret_extent, (long int) extent[n]);
 	    }
 	}
     }

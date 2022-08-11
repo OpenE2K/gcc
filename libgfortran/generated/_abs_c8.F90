@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_8)
 #ifdef HAVE_CABS
 
-elemental function _gfortran_specific__abs_c8 (parm)
+elemental function _lfortran_specific__abs_c8 (parm)
    complex (kind=8), intent (in) :: parm
-   real (kind=8) :: _gfortran_specific__abs_c8
+   real (kind=8) :: _lfortran_specific__abs_c8
 
-   _gfortran_specific__abs_c8 = abs (parm)
+   _lfortran_specific__abs_c8 = abs (parm)
 end function
 
 #endif

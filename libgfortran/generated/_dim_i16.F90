@@ -34,11 +34,11 @@
 
 
 
-elemental function _gfortran_specific__dim_i16 (p1, p2)
+elemental function _lfortran_specific__dim_i16 (p1, p2)
    integer (kind=16), intent (in) :: p1, p2
-   integer (kind=16) :: _gfortran_specific__dim_i16
+   integer (kind=16) :: _lfortran_specific__dim_i16
 
-   _gfortran_specific__dim_i16 = dim (p1, p2)
+   _lfortran_specific__dim_i16 = dim (p1, p2)
 end function
 
 

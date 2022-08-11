@@ -38,7 +38,7 @@ static const char yes[] = "YES", no[] = "NO", undefined[] = "UNDEFINED";
 static void
 inquire_via_unit (st_parameter_inquire *iqp, gfc_unit *u)
 {
-  const char *p;
+  const char *p = NULL;
   GFC_INTEGER_4 cf = iqp->common.flags;
 
   if (iqp->common.unit == GFC_INTERNAL_UNIT ||

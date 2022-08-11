@@ -23,7 +23,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 #include <strings.h>
 

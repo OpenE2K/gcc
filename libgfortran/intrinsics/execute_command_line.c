@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 #ifdef HAVE_UNISTD_H
@@ -53,7 +53,7 @@ set_cmdstat (int *cmdstat, int value)
     {
 #define MSGLEN 200
       char msg[MSGLEN] = "EXECUTE_COMMAND_LINE: ";
-      strncat (msg, cmdmsg_values[value], MSGLEN - strlen(msg) - 1);
+      strncat (msg, _(cmdmsg_values[value]), MSGLEN - strlen(msg) - 1);
       runtime_error ("%s", msg);
     }
 }
@@ -125,9 +125,14 @@ execute_command_line (const char *command, bool wait, int *exitstat,
   free (cmd);
 
   /* Now copy back to the Fortran string if needed.  */
-  if (cmdstat && *cmdstat > EXEC_NOERROR && cmdmsg)
-    fstrcpy (cmdmsg, cmdmsg_len, cmdmsg_values[*cmdstat],
-		strlen (cmdmsg_values[*cmdstat]));
+  if (cmdstat && *cmdstat > EXEC_NOERROR)
+    {
+		const char* msg = _(cmdmsg_values[*cmdstat]);
+      if (cmdmsg)
+	    fstrcpy (cmdmsg, cmdmsg_len, msg, strlen (msg));
+      else
+	    runtime_error ("Failure in EXECUTE_COMMAND_LINE: %s", msg);
+    }
 }
 
 

@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_10)
 #ifdef HAVE_TRUNCL
 
-elemental function _gfortran_specific__aint_r10 (parm)
+elemental function _lfortran_specific__aint_r10 (parm)
    real (kind=10), intent (in) :: parm
-   real (kind=10) :: _gfortran_specific__aint_r10
+   real (kind=10) :: _lfortran_specific__aint_r10
 
-   _gfortran_specific__aint_r10 = aint (parm)
+   _lfortran_specific__aint_r10 = aint (parm)
 end function
 
 #endif

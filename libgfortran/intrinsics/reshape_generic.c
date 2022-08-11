@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 typedef GFC_ARRAY_DESCRIPTOR(1, index_type) shape_type;
@@ -154,10 +154,8 @@ reshape_internal (parray *ret, parray *source, shape_type *shape,
 	  rs *= shape_data[n];
 	  ret_extent = GFC_DESCRIPTOR_EXTENT(ret,n);
 	  if (ret_extent != shape_data[n])
-	    runtime_error("Incorrect extent in return value of RESHAPE"
-			  " intrinsic in dimension %ld: is %ld,"
-			  " should be %ld", (long int) n+1,
-			  (long int) ret_extent, (long int) shape_data[n]);
+	    runtime_error("Incorrect extent in return value of RESHAPE intrinsic in dimension %ld: is %ld, should be %ld",
+		      (long int) n+1, (long int) ret_extent, (long int) shape_data[n]);
 	}
 
       source_extent = 1;
@@ -174,8 +172,7 @@ reshape_internal (parray *ret, parray *source, shape_type *shape,
 	}
 
       if (rs > source_extent && (!pad || pempty))
-	runtime_error("Incorrect size in SOURCE argument to RESHAPE"
-		      " intrinsic: is %ld, should be %ld",
+	runtime_error("Incorrect size in SOURCE argument to RESHAPE intrinsic: is %ld, should be %ld",
 		      (long int) source_extent, (long int) rs);
 
       if (order)
@@ -191,12 +188,10 @@ reshape_internal (parray *ret, parray *source, shape_type *shape,
 	      v = order->base_addr[n * GFC_DESCRIPTOR_STRIDE(order,0)] - 1;
 
 	      if (v < 0 || v >= rdim)
-		runtime_error("Value %ld out of range in ORDER argument"
-			      " to RESHAPE intrinsic", (long int) v + 1);
+		runtime_error("Value %ld out of range in ORDER argument to RESHAPE intrinsic", (long int) v + 1);
 
 	      if (seen[v] != 0)
-		runtime_error("Duplicate value %ld in ORDER argument to"
-			      " RESHAPE intrinsic", (long int) v + 1);
+		runtime_error("Duplicate value %ld in ORDER argument to RESHAPE intrinsic", (long int) v + 1);
 		
 	      seen[v] = 1;
 	    }

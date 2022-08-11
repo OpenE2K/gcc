@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 #if defined (HAVE_GFC_LOGICAL_2) && defined (HAVE_GFC_LOGICAL_2)
@@ -93,7 +93,7 @@ parity_l2 (gfc_array_l2 * const restrict retarray,
 	}
 
       retarray->offset = 0;
-      retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
+      // retarray->dtype = (array->dtype & ~GFC_DTYPE_RANK_MASK) | rank;
 
       alloc_size = GFC_DESCRIPTOR_STRIDE(retarray,rank-1) * extent[rank-1];
 
@@ -109,14 +109,12 @@ parity_l2 (gfc_array_l2 * const restrict retarray,
   else
     {
       if (rank != GFC_DESCRIPTOR_RANK (retarray))
-	runtime_error ("rank of return array incorrect in"
-		       " PARITY intrinsic: is %ld, should be %ld",
+	runtime_error ("rank of return array incorrect in PARITY intrinsic: is %ld, should be %ld",
 		       (long int) (GFC_DESCRIPTOR_RANK (retarray)),
 		       (long int) rank);
 
       if (unlikely (compile_options.bounds_check))
-	bounds_ifunction_return ((array_t *) retarray, extent,
-				 "return value", "PARITY");
+		bounds_ifunction_return ((array_t *) retarray, extent, _("return value"), "PARITY");
     }
 
   for (n = 0; n < rank; n++)

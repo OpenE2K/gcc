@@ -39,6 +39,24 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #include <string.h>
 #include <errno.h>
 
+#ifdef __ESTONIAN__
+#ifdef __ptr32__
+/* bug #106101 */
+#undef HAVE_FCNTL
+#endif
+#endif
+
+/* the mkostemp is not predefined */
+#if defined(HAVE_MKOSTEMP) && defined(O_CLOEXEC)
+extern int mkostemp(char *template, int flags);
+#endif
+
+#ifdef __LCC__
+/* in LCC function secure_getenv is not declared. */
+/* to add declaration of it. */
+
+extern char *secure_getenv (const char *name);
+#endif
 
 /* For mingw, we don't identify files by their inode number, but by a
    64-bit identifier created from a BY_HANDLE_FILE_INFORMATION. */
@@ -147,23 +165,31 @@ id_from_fd (const int fd)
 static int
 fallback_access (const char *path, int mode)
 {
-  int fd;
+    int fd;
 
-  if ((mode & R_OK) && (fd = open (path, O_RDONLY)) < 0)
-    return -1;
-  close (fd);
-
-  if ((mode & W_OK) && (fd = open (path, O_WRONLY)) < 0)
-    return -1;
-  close (fd);
-
-  if (mode == F_OK)
+    if (mode & R_OK)
     {
-      struct stat st;
-      return stat (path, &st);
+        if ((fd = open (path, O_RDONLY)) < 0)
+            return -1;
+        else
+            close (fd);
     }
 
-  return 0;
+    if (mode & W_OK)
+    {
+        if ((fd = open (path, O_WRONLY)) < 0)
+            return -1;
+        else
+            close (fd);
+    }
+
+    if (mode == F_OK)
+    {
+        struct stat st;
+        return stat (path, &st);
+    }
+
+    return 0;
 }
 
 #undef access
@@ -808,7 +834,7 @@ mem_alloc_r4 (stream *strm, int *len)
 
   s->logical_offset = where + *len;
 
-  return s->buffer + (where - s->buffer_offset) * 4;
+  return s->buffer + (where - s->buffer_offset) * sizeof(gfc_char4_t);
 }
 
 
@@ -884,7 +910,7 @@ mem_read4 (stream *s, void *buf, ssize_t nbytes)
   p = mem_alloc_r4 (s, &nb);
   if (p)
     {
-      memcpy (buf, p, nb * 4);
+      memcpy (buf, p, nb * sizeof(gfc_char4_t));
       return (ssize_t) nb;
     }
   else
@@ -993,8 +1019,9 @@ mem_flush (unix_stream *s __attribute__ ((unused)))
 static int
 mem_close (unix_stream *s)
 {
-  if (s)
-    free (s);
+    if (s)
+        free (s);
+
   return 0;
 }
 
@@ -1315,8 +1342,8 @@ static int
 regular_file2 (const char *path, st_parameter_open *opp, unit_flags *flags)
 {
   int mode;
-  int rwflag;
-  int crflag, crflag2;
+  int rwflag = 0;
+  int crflag = 0, crflag2;
   int fd;
 
 #ifdef __CYGWIN__

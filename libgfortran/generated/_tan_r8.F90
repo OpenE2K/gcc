@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_8)
 #ifdef HAVE_TAN
 
-elemental function _gfortran_specific__tan_r8 (parm)
+elemental function _lfortran_specific__tan_r8 (parm)
    real (kind=8), intent (in) :: parm
-   real (kind=8) :: _gfortran_specific__tan_r8
+   real (kind=8) :: _lfortran_specific__tan_r8
 
-   _gfortran_specific__tan_r8 = tan (parm)
+   _lfortran_specific__tan_r8 = tan (parm)
 end function
 
 #endif

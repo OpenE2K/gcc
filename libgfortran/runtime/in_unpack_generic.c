@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 extern void internal_unpack (gfc_array_char *, const void *);
@@ -102,10 +102,12 @@ internal_unpack (gfc_array_char * d, const void * s)
 # endif
 
 # if defined(HAVE_GFC_REAL_16)
+#  if defined(HAVE_FLOAT128)
     case GFC_DTYPE_REAL_16:
       internal_unpack_r16 ((gfc_array_r16 *) d, (const GFC_REAL_16 *) s);
       return;
 # endif
+#endif
 #endif
 
     case GFC_DTYPE_COMPLEX_4:
@@ -129,10 +131,12 @@ internal_unpack (gfc_array_char * d, const void * s)
       return;
 # endif
 
+#  if defined(HAVE_FLOAT128)
 # if defined(HAVE_GFC_COMPLEX_16)
     case GFC_DTYPE_COMPLEX_16:
       internal_unpack_c16 ((gfc_array_c16 *) d, (const GFC_COMPLEX_16 *) s);
       return;
+# endif
 # endif
 #endif
 

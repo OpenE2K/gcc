@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_4)
 #ifdef HAVE_EXPF
 
-elemental function _gfortran_specific__exp_r4 (parm)
+elemental function _lfortran_specific__exp_r4 (parm)
    real (kind=4), intent (in) :: parm
-   real (kind=4) :: _gfortran_specific__exp_r4
+   real (kind=4) :: _lfortran_specific__exp_r4
 
-   _gfortran_specific__exp_r4 = exp (parm)
+   _lfortran_specific__exp_r4 = exp (parm)
 end function
 
 #endif

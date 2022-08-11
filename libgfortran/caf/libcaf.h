@@ -30,7 +30,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #include <stddef.h>	/* For size_t.  */
 #include <stdint.h>	/* For int32_t.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 #if 0
 #ifndef __GNUC__
@@ -44,7 +44,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #endif
 
 /* Definitions of the Fortran 2008 standard; need to kept in sync with
-   ISO_FORTRAN_ENV, cf. gcc/fortran/libgfortran.h.  */
+   ISO_FORTRAN_ENV, cf. gcc/fortran/liblfortran.h.  */
 typedef enum
 {
   CAF_STAT_UNLOCKED = 0,
@@ -183,81 +183,81 @@ typedef struct caf_reference_t {
   } u;
 } caf_reference_t;
 
-void _gfortran_caf_init (int *, char ***);
-void _gfortran_caf_finalize (void);
+void _lfortran_caf_init (int *, char ***);
+void _lfortran_caf_finalize (void);
 
-int _gfortran_caf_this_image (int);
-int _gfortran_caf_num_images (int, int);
+int _lfortran_caf_this_image (int);
+int _lfortran_caf_num_images (int, int);
 
-void _gfortran_caf_register (size_t, caf_register_t, caf_token_t *,
+void _lfortran_caf_register (size_t, caf_register_t, caf_token_t *,
 			     gfc_descriptor_t *, int *, char *, int);
-void _gfortran_caf_deregister (caf_token_t *, caf_deregister_t, int *, char *,
+void _lfortran_caf_deregister (caf_token_t *, caf_deregister_t, int *, char *,
 			       int);
 
-void _gfortran_caf_sync_all (int *, char *, int);
-void _gfortran_caf_sync_memory (int *, char *, int);
-void _gfortran_caf_sync_images (int, int[], int *, char *, int);
+void _lfortran_caf_sync_all (int *, char *, int);
+void _lfortran_caf_sync_memory (int *, char *, int);
+void _lfortran_caf_sync_images (int, int[], int *, char *, int);
 
-void _gfortran_caf_stop_numeric (int32_t)
+void _lfortran_caf_stop_numeric (int32_t)
      __attribute__ ((noreturn));
-void _gfortran_caf_stop_str (const char *, int32_t)
+void _lfortran_caf_stop_str (const char *, int32_t)
      __attribute__ ((noreturn));
-void _gfortran_caf_error_stop_str (const char *, int32_t)
+void _lfortran_caf_error_stop_str (const char *, int32_t)
      __attribute__ ((noreturn));
-void _gfortran_caf_error_stop (int32_t) __attribute__ ((noreturn));
-void _gfortran_caf_fail_image (void) __attribute__ ((noreturn));
+void _lfortran_caf_error_stop (int32_t) __attribute__ ((noreturn));
+void _lfortran_caf_fail_image (void) __attribute__ ((noreturn));
 
-void _gfortran_caf_co_broadcast (gfc_descriptor_t *, int, int *, char *, int);
-void _gfortran_caf_co_sum (gfc_descriptor_t *, int, int *, char *, int);
-void _gfortran_caf_co_min (gfc_descriptor_t *, int, int *, char *, int, int);
-void _gfortran_caf_co_max (gfc_descriptor_t *, int, int *, char *, int, int);
-void _gfortran_caf_co_reduce (gfc_descriptor_t *, void* (*) (void *, void*),
+void _lfortran_caf_co_broadcast (gfc_descriptor_t *, int, int *, char *, int);
+void _lfortran_caf_co_sum (gfc_descriptor_t *, int, int *, char *, int);
+void _lfortran_caf_co_min (gfc_descriptor_t *, int, int *, char *, int, int);
+void _lfortran_caf_co_max (gfc_descriptor_t *, int, int *, char *, int, int);
+void _lfortran_caf_co_reduce (gfc_descriptor_t *, void* (*) (void *, void*),
 			      int, int, int *, char *, int, int);
 
-void _gfortran_caf_get (caf_token_t, size_t, int, gfc_descriptor_t *,
+void _lfortran_caf_get (caf_token_t, size_t, int, gfc_descriptor_t *,
 			caf_vector_t *, gfc_descriptor_t *, int, int, bool,
 			int *);
-void _gfortran_caf_send (caf_token_t, size_t, int, gfc_descriptor_t *,
+void _lfortran_caf_send (caf_token_t, size_t, int, gfc_descriptor_t *,
 			 caf_vector_t *, gfc_descriptor_t *, int, int, bool,
 			 int *);
-void _gfortran_caf_sendget (caf_token_t, size_t, int, gfc_descriptor_t *,
+void _lfortran_caf_sendget (caf_token_t, size_t, int, gfc_descriptor_t *,
 			    caf_vector_t *, caf_token_t, size_t, int,
-			    gfc_descriptor_t *, caf_vector_t *, int, int, bool);
+			    gfc_descriptor_t *, caf_vector_t *, int, int, bool, int *stat);
 
-void _gfortran_caf_get_by_ref (caf_token_t token, int image_idx,
+void _lfortran_caf_get_by_ref (caf_token_t token, int image_idx,
 	gfc_descriptor_t *dst, caf_reference_t *refs, int dst_kind,
 	int src_kind, bool may_require_tmp, bool dst_reallocatable, int *stat);
-void _gfortran_caf_send_by_ref (caf_token_t token, int image_index,
+void _lfortran_caf_send_by_ref (caf_token_t token, int image_index,
 	gfc_descriptor_t *src, caf_reference_t *refs, int dst_kind,
 	int src_kind, bool may_require_tmp, bool dst_reallocatable, int *stat);
-void _gfortran_caf_sendget_by_ref (
+void _lfortran_caf_sendget_by_ref (
 	caf_token_t dst_token, int dst_image_index, caf_reference_t *dst_refs,
 	caf_token_t src_token, int src_image_index, caf_reference_t *src_refs,
 	int dst_kind, int src_kind, bool may_require_tmp, int *dst_stat,
 	int *src_stat);
 
-void _gfortran_caf_atomic_define (caf_token_t, size_t, int, void *, int *,
+void _lfortran_caf_atomic_define (caf_token_t, size_t, int, void *, int *,
 				  int, int);
-void _gfortran_caf_atomic_ref (caf_token_t, size_t, int, void *, int *,
+void _lfortran_caf_atomic_ref (caf_token_t, size_t, int, void *, int *,
 			       int, int);
-void _gfortran_caf_atomic_cas (caf_token_t, size_t, int, void *, void *,
+void _lfortran_caf_atomic_cas (caf_token_t, size_t, int, void *, void *,
 			       void *, int *, int, int);
-void _gfortran_caf_atomic_op (int, caf_token_t, size_t, int, void *, void *,
+void _lfortran_caf_atomic_op (int, caf_token_t, size_t, int, void *, void *,
 			      int *, int, int);
 
-void _gfortran_caf_lock (caf_token_t, size_t, int, int *, int *, char *, int);
-void _gfortran_caf_unlock (caf_token_t, size_t, int, int *, char *, int);
-void _gfortran_caf_event_post (caf_token_t, size_t, int, int *, char *, int);
-void _gfortran_caf_event_wait (caf_token_t, size_t, int, int *, char *, int);
-void _gfortran_caf_event_query (caf_token_t, size_t, int, int *, int *);
+void _lfortran_caf_lock (caf_token_t, size_t, int, int *, int *, char *, int);
+void _lfortran_caf_unlock (caf_token_t, size_t, int, int *, char *, int);
+void _lfortran_caf_event_post (caf_token_t, size_t, int, int *, char *, int);
+void _lfortran_caf_event_wait (caf_token_t, size_t, int, int *, char *, int);
+void _lfortran_caf_event_query (caf_token_t, size_t, int, int *, int *);
 
-void _gfortran_caf_failed_images (gfc_descriptor_t *,
+void _lfortran_caf_failed_images (gfc_descriptor_t *,
 				  caf_team_t * __attribute__ ((unused)), int *);
-int _gfortran_caf_image_status (int, caf_team_t * __attribute__ ((unused)));
-void _gfortran_caf_stopped_images (gfc_descriptor_t *,
+int _lfortran_caf_image_status (int, caf_team_t * __attribute__ ((unused)));
+void _lfortran_caf_stopped_images (gfc_descriptor_t *,
 				   caf_team_t * __attribute__ ((unused)),
 				   int *);
 
-int _gfortran_caf_is_present (caf_token_t, int, caf_reference_t *);
+int _lfortran_caf_is_present (caf_token_t, int, caf_reference_t *);
 
 #endif  /* LIBCAF_H  */

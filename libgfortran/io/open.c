@@ -190,32 +190,32 @@ edit_modes (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
   if (flags->status != STATUS_UNSPECIFIED && flags->status != STATUS_OLD && 
       u->flags.status != flags->status)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "Cannot change STATUS parameter in OPEN statement");
+		    _("Cannot change STATUS parameter in OPEN statement"));
 
   if (flags->access != ACCESS_UNSPECIFIED && u->flags.access != flags->access)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "Cannot change ACCESS parameter in OPEN statement");
+		    _("Cannot change ACCESS parameter in OPEN statement"));
 
   if (flags->form != FORM_UNSPECIFIED && u->flags.form != flags->form)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "Cannot change FORM parameter in OPEN statement");
+		    _("Cannot change FORM parameter in OPEN statement"));
 
   if ((opp->common.flags & IOPARM_OPEN_HAS_RECL_IN)
       && opp->recl_in != u->recl)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "Cannot change RECL parameter in OPEN statement");
+		    _("Cannot change RECL parameter in OPEN statement"));
 
   if (flags->action != ACTION_UNSPECIFIED && u->flags.action != flags->action)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "Cannot change ACTION parameter in OPEN statement");
+		    _("Cannot change ACTION parameter in OPEN statement"));
 
   if (flags->share != SHARE_UNSPECIFIED && u->flags.share != flags->share)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "Cannot change SHARE parameter in OPEN statement");
+		    _("Cannot change SHARE parameter in OPEN statement"));
 
   if (flags->cc != CC_UNSPECIFIED && u->flags.cc != flags->cc)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		  "Cannot change CARRIAGECONTROL parameter in OPEN statement");
+		  _("Cannot change CARRIAGECONTROL parameter in OPEN statement"));
 
   /* Status must be OLD if present.  */
 
@@ -223,49 +223,42 @@ edit_modes (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       flags->status != STATUS_UNKNOWN)
     {
       if (flags->status == STATUS_SCRATCH)
-	notify_std (&opp->common, GFC_STD_GNU,
-		    "OPEN statement must have a STATUS of OLD or UNKNOWN");
+	notify_std (&opp->common, FTN_STD_GNU,
+		    _("OPEN statement must have a STATUS of OLD or UNKNOWN"));
       else
 	generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "OPEN statement must have a STATUS of OLD or UNKNOWN");
+		    _("OPEN statement must have a STATUS of OLD or UNKNOWN"));
     }
 
   if (u->flags.form == FORM_UNFORMATTED)
     {
       if (flags->delim != DELIM_UNSPECIFIED)
 	generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			"DELIM parameter conflicts with UNFORMATTED form in "
-			"OPEN statement");
+			_("DELIM parameter conflicts with UNFORMATTED form in OPEN statement"));
 
       if (flags->blank != BLANK_UNSPECIFIED)
 	generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			"BLANK parameter conflicts with UNFORMATTED form in "
-			"OPEN statement");
+			_("BLANK parameter conflicts with UNFORMATTED form in OPEN statement"));
 
       if (flags->pad != PAD_UNSPECIFIED)
 	generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			"PAD parameter conflicts with UNFORMATTED form in "
-			"OPEN statement");
+			_("PAD parameter conflicts with UNFORMATTED form in OPEN statement"));
 
       if (flags->decimal != DECIMAL_UNSPECIFIED)
 	generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			"DECIMAL parameter conflicts with UNFORMATTED form in "
-			"OPEN statement");
+			_("DECIMAL parameter conflicts with UNFORMATTED form in OPEN statement"));
 
       if (flags->encoding != ENCODING_UNSPECIFIED)
 	generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			"ENCODING parameter conflicts with UNFORMATTED form in "
-			"OPEN statement");
+			_("ENCODING parameter conflicts with UNFORMATTED form in OPEN statement"));
 
       if (flags->round != ROUND_UNSPECIFIED)
 	generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			"ROUND parameter conflicts with UNFORMATTED form in "
-			"OPEN statement");
+			_("ROUND parameter conflicts with UNFORMATTED form in OPEN statement"));
 
       if (flags->sign != SIGN_UNSPECIFIED)
 	generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			"SIGN parameter conflicts with UNFORMATTED form in "
-			"OPEN statement");
+			_("SIGN parameter conflicts with UNFORMATTED form in OPEN statement"));
     }
 
   if ((opp->common.flags & IOPARM_LIBRETURN_MASK) == IOPARM_LIBRETURN_OK)
@@ -357,8 +350,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
   else if (flags->form == FORM_UNFORMATTED && flags->cc != CC_NONE)
     {
       generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-	  "CARRIAGECONTROL parameter conflicts with UNFORMATTED form in "
-	  "OPEN statement");
+	  _("CARRIAGECONTROL parameter conflicts with UNFORMATTED form in OPEN statement"));
       goto fail;
     }
 
@@ -368,8 +360,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       && flags->form == FORM_UNFORMATTED)
     {
       generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-		      "DELIM parameter conflicts with UNFORMATTED form in "
-		      "OPEN statement");
+		      _("DELIM parameter conflicts with UNFORMATTED form in OPEN statement"));
       goto fail;
     }
 
@@ -380,8 +371,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       if (flags->form == FORM_UNFORMATTED)
 	{
 	  generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			  "BLANK parameter conflicts with UNFORMATTED form in "
-			  "OPEN statement");
+			  _("BLANK parameter conflicts with UNFORMATTED form in OPEN statement"));
 	  goto fail;
 	}
     }
@@ -393,8 +383,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       if (flags->form == FORM_UNFORMATTED)
 	{
 	  generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			  "PAD parameter conflicts with UNFORMATTED form in "
-			  "OPEN statement");
+			  _("PAD parameter conflicts with UNFORMATTED form in OPEN statement"));
 	  goto fail;
 	}
     }
@@ -406,8 +395,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       if (flags->form == FORM_UNFORMATTED)
 	{
 	  generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			  "DECIMAL parameter conflicts with UNFORMATTED form "
-			  "in OPEN statement");
+			  _("DECIMAL parameter conflicts with UNFORMATTED form in OPEN statement"));
 	  goto fail;
 	}
     }
@@ -419,8 +407,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       if (flags->form == FORM_UNFORMATTED)
 	{
 	  generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			  "ENCODING parameter conflicts with UNFORMATTED form in "
-			  "OPEN statement");
+			  _("ENCODING parameter conflicts with UNFORMATTED form in OPEN statement"));
 	  goto fail;
 	}
     }
@@ -436,8 +423,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       if (flags->form == FORM_UNFORMATTED)
 	{
 	  generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			  "ROUND parameter conflicts with UNFORMATTED form in "
-			  "OPEN statement");
+			  _("ROUND parameter conflicts with UNFORMATTED form in OPEN statement"));
 	  goto fail;
 	}
     }
@@ -449,8 +435,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       if (flags->form == FORM_UNFORMATTED)
 	{
 	  generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-			  "SIGN parameter conflicts with UNFORMATTED form in "
-			  "OPEN statement");
+			  _("SIGN parameter conflicts with UNFORMATTED form in OPEN statement"));
 	  goto fail;
 	}
     }
@@ -458,8 +443,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
   if (flags->position != POSITION_ASIS && flags->access == ACCESS_DIRECT)
    {
      generate_error (&opp->common, LIBERROR_OPTION_CONFLICT,
-                     "ACCESS parameter conflicts with SEQUENTIAL access in "
-                     "OPEN statement");
+                     _("ACCESS parameter conflicts with SEQUENTIAL access in OPEN statement"));
      goto fail;
    }
   else
@@ -470,14 +454,14 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       && (opp->common.flags & IOPARM_OPEN_HAS_RECL_IN) == 0)
     {
       generate_error (&opp->common, LIBERROR_MISSING_OPTION,
-		      "Missing RECL parameter in OPEN statement");
+		      _("Missing RECL parameter in OPEN statement"));
       goto fail;
     }
 
   if ((opp->common.flags & IOPARM_OPEN_HAS_RECL_IN) && opp->recl_in <= 0)
     {
       generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		      "RECL parameter is non-positive in OPEN statement");
+		      _("RECL parameter is non-positive in OPEN statement"));
       goto fail;
     }
 
@@ -491,7 +475,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
 	}
 
       generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		      "FILE parameter must not be present in OPEN statement");
+		      _("FILE parameter must not be present in OPEN statement"));
       goto fail;
 
     case STATUS_OLD:
@@ -538,7 +522,7 @@ new_unit (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
       char *path = fc_strdup (opp->file, opp->file_len);
       size_t msglen = opp->file_len + 22 + sizeof (errbuf);
       char *msg = xmalloc (msglen);
-      snprintf (msg, msglen, "Cannot open file '%s': %s", path,
+      snprintf (msg, msglen, _("Cannot open file '%s': %s"), path,
 		gf_strerror (errno, errbuf, sizeof (errbuf)));
       generate_error (&opp->common, LIBERROR_OS, msg);
       free (msg);
@@ -688,7 +672,7 @@ already_open (st_parameter_open *opp, gfc_unit *u, unit_flags *flags)
 	{
 	  unlock_unit (u);
 	  generate_error (&opp->common, LIBERROR_OS,
-			  "Error closing file in OPEN statement");
+			  _("Error closing file in OPEN statement"));
 	  return;
 	}
 
@@ -731,63 +715,63 @@ st_open (st_parameter_open *opp)
 
   flags.access = !(cf & IOPARM_OPEN_HAS_ACCESS) ? ACCESS_UNSPECIFIED :
     find_option (&opp->common, opp->access, opp->access_len,
-		 access_opt, "Bad ACCESS parameter in OPEN statement");
+		 access_opt, _("Bad ACCESS parameter in OPEN statement"));
 
   flags.action = !(cf & IOPARM_OPEN_HAS_ACTION) ? ACTION_UNSPECIFIED :
     find_option (&opp->common, opp->action, opp->action_len,
-		 action_opt, "Bad ACTION parameter in OPEN statement");
+		 action_opt, _("Bad ACTION parameter in OPEN statement"));
 
   flags.cc = !(cf & IOPARM_OPEN_HAS_CC) ? CC_UNSPECIFIED :
     find_option (&opp->common, opp->cc, opp->cc_len,
-		 cc_opt, "Bad CARRIAGECONTROL parameter in OPEN statement");
+		 cc_opt, _("Bad CARRIAGECONTROL parameter in OPEN statement"));
 
   flags.share = !(cf & IOPARM_OPEN_HAS_SHARE) ? SHARE_UNSPECIFIED :
     find_option (&opp->common, opp->share, opp->share_len,
-		 share_opt, "Bad SHARE parameter in OPEN statement");
+		 share_opt, _("Bad SHARE parameter in OPEN statement"));
 
   flags.blank = !(cf & IOPARM_OPEN_HAS_BLANK) ? BLANK_UNSPECIFIED :
     find_option (&opp->common, opp->blank, opp->blank_len,
-		 blank_opt, "Bad BLANK parameter in OPEN statement");
+		 blank_opt, _("Bad BLANK parameter in OPEN statement"));
 
   flags.delim = !(cf & IOPARM_OPEN_HAS_DELIM) ? DELIM_UNSPECIFIED :
     find_option (&opp->common, opp->delim, opp->delim_len,
-		 delim_opt, "Bad DELIM parameter in OPEN statement");
+		 delim_opt, _("Bad DELIM parameter in OPEN statement"));
 
   flags.pad = !(cf & IOPARM_OPEN_HAS_PAD) ? PAD_UNSPECIFIED :
     find_option (&opp->common, opp->pad, opp->pad_len,
-		 pad_opt, "Bad PAD parameter in OPEN statement");
+		 pad_opt, _("Bad PAD parameter in OPEN statement"));
 
   flags.decimal = !(cf & IOPARM_OPEN_HAS_DECIMAL) ? DECIMAL_UNSPECIFIED :
     find_option (&opp->common, opp->decimal, opp->decimal_len,
-		 decimal_opt, "Bad DECIMAL parameter in OPEN statement");
+		 decimal_opt, _("Bad DECIMAL parameter in OPEN statement"));
 
   flags.encoding = !(cf & IOPARM_OPEN_HAS_ENCODING) ? ENCODING_UNSPECIFIED :
     find_option (&opp->common, opp->encoding, opp->encoding_len,
-		 encoding_opt, "Bad ENCODING parameter in OPEN statement");
+		 encoding_opt, _("Bad ENCODING parameter in OPEN statement"));
 
   flags.async = !(cf & IOPARM_OPEN_HAS_ASYNCHRONOUS) ? ASYNC_UNSPECIFIED :
     find_option (&opp->common, opp->asynchronous, opp->asynchronous_len,
-		 async_opt, "Bad ASYNCHRONOUS parameter in OPEN statement");
+		 async_opt, _("Bad ASYNCHRONOUS parameter in OPEN statement"));
 
   flags.round = !(cf & IOPARM_OPEN_HAS_ROUND) ? ROUND_UNSPECIFIED :
     find_option (&opp->common, opp->round, opp->round_len,
-		 round_opt, "Bad ROUND parameter in OPEN statement");
+		 round_opt, _("Bad ROUND parameter in OPEN statement"));
 
   flags.sign = !(cf & IOPARM_OPEN_HAS_SIGN) ? SIGN_UNSPECIFIED :
     find_option (&opp->common, opp->sign, opp->sign_len,
-		 sign_opt, "Bad SIGN parameter in OPEN statement");
+		 sign_opt, _("Bad SIGN parameter in OPEN statement"));
 
   flags.form = !(cf & IOPARM_OPEN_HAS_FORM) ? FORM_UNSPECIFIED :
     find_option (&opp->common, opp->form, opp->form_len,
-		 form_opt, "Bad FORM parameter in OPEN statement");
+		 form_opt, _("Bad FORM parameter in OPEN statement"));
 
   flags.position = !(cf & IOPARM_OPEN_HAS_POSITION) ? POSITION_UNSPECIFIED :
     find_option (&opp->common, opp->position, opp->position_len,
-		 position_opt, "Bad POSITION parameter in OPEN statement");
+		 position_opt, _("Bad POSITION parameter in OPEN statement"));
 
   flags.status = !(cf & IOPARM_OPEN_HAS_STATUS) ? STATUS_UNSPECIFIED :
     find_option (&opp->common, opp->status, opp->status_len,
-		 status_opt, "Bad STATUS parameter in OPEN statement");
+		 status_opt, _("Bad STATUS parameter in OPEN statement"));
 
   /* First, we check wether the convert flag has been set via environment
      variable.  This overrides the convert tag in the open statement.  */
@@ -800,7 +784,7 @@ st_open (st_parameter_open *opp)
       if (cf & IOPARM_OPEN_HAS_CONVERT)
 	conv = find_option (&opp->common, opp->convert, opp->convert_len,
 			    convert_opt,
-			    "Bad CONVERT parameter in OPEN statement");
+			    _("Bad CONVERT parameter in OPEN statement"));
       else
 	conv = compile_options.convert;
     }
@@ -831,23 +815,22 @@ st_open (st_parameter_open *opp)
   if (flags.position != POSITION_UNSPECIFIED
       && flags.access == ACCESS_DIRECT)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "Cannot use POSITION with direct access files");
+		    _("Cannot use POSITION with direct access files"));
 
   if (flags.readonly
       && flags.action != ACTION_UNSPECIFIED && flags.action != ACTION_READ)
     generate_error (&opp->common, LIBERROR_BAD_OPTION,
-		    "ACTION conflicts with READONLY in OPEN statement");
+		    _("ACTION conflicts with READONLY in OPEN statement"));
 
   if (flags.access == ACCESS_APPEND)
     {
       if (flags.position != POSITION_UNSPECIFIED
 	  && flags.position != POSITION_APPEND)
 	generate_error (&opp->common, LIBERROR_BAD_OPTION,
-			"Conflicting ACCESS and POSITION flags in"
-			" OPEN statement");
+			_("Conflicting ACCESS and POSITION flags in OPEN statement"));
 
-      notify_std (&opp->common, GFC_STD_GNU,
-		  "Extension: APPEND as a value for ACCESS in OPEN statement");
+      notify_std (&opp->common, FTN_STD_GNU,
+		  _("Extension: APPEND as a value for ACCESS in OPEN statement"));
       flags.access = ACCESS_SEQUENTIAL;
       flags.position = POSITION_APPEND;
     }
@@ -865,7 +848,7 @@ st_open (st_parameter_open *opp)
 	  if (u == NULL) /* Negative unit and no NEWUNIT-created unit found.  */
 	    {
 	      generate_error (&opp->common, LIBERROR_BAD_OPTION,
-			      "Bad unit number in OPEN statement");
+			      _("Bad unit number in OPEN statement"));
 	      library_end ();
 	      return;
 	    }

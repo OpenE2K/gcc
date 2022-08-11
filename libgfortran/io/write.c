@@ -1483,7 +1483,7 @@ write_character (st_parameter_dt *dtp, const char *source, int kind, int length,
 
 /* Floating point helper functions.  */
 
-#define BUF_STACK_SZ 256
+#define BUF_STACK_SZ 384
 
 static int
 get_precision (st_parameter_dt *dtp, const fnode *f, const char *source, int kind)
@@ -1502,7 +1502,7 @@ get_precision (st_parameter_dt *dtp, const fnode *f, const char *source, int kin
 static int
 size_from_kind (st_parameter_dt *dtp, const fnode *f, int kind)
 {
-  int size;
+  int size = 0;
 
   if (f->format == FMT_F && f->u.real.w == 0)
     {
@@ -1537,8 +1537,7 @@ select_buffer (st_parameter_dt *dtp, const fnode *f, int precision,
 {
   char *result;
   
-  /* The buffer needs at least one more byte to allow room for
-     normalizing and 1 to hold null terminator.  */
+  /* The buffer needs at least one more byte to allow room for normalizing and 1 to hold null terminator.  */
   *size = size_from_kind (dtp, f, kind) + precision + 1 + 1;
 
   if (*size > BUF_STACK_SZ)
@@ -1584,7 +1583,7 @@ write_float_0 (st_parameter_dt *dtp, const fnode *f, const char *source, int kin
   char buf_stack[BUF_STACK_SZ];
   char str_buf[BUF_STACK_SZ];
   char *buffer, *result;
-  size_t buf_size, res_len;
+  size_t buf_size, res_len, flt_str_len;
 
   /* Precision for snprintf call.  */
   int precision = get_precision (dtp, f, source, kind);
@@ -1595,8 +1594,8 @@ write_float_0 (st_parameter_dt *dtp, const fnode *f, const char *source, int kin
   buffer = select_buffer (dtp, f, precision, buf_stack, &buf_size, kind);
   
   get_float_string (dtp, f, source , kind, 0, buffer,
-                           precision, buf_size, result, &res_len);
-  write_float_string (dtp, result, res_len);
+                           precision, buf_size, result, &flt_str_len);
+  write_float_string (dtp, result, flt_str_len);
 
   if (buf_size > BUF_STACK_SZ)
     free (buffer);
@@ -1699,7 +1698,7 @@ write_real (st_parameter_dt *dtp, const char *source, int kind)
   char buf_stack[BUF_STACK_SZ];
   char str_buf[BUF_STACK_SZ];
   char *buffer, *result;
-  size_t buf_size, res_len;
+  size_t buf_size, res_len, flt_str_len;
   int orig_scale = dtp->u.p.scale_factor;
   dtp->u.p.scale_factor = 1;
   set_fnode_default (dtp, &f, kind);
@@ -1714,8 +1713,8 @@ write_real (st_parameter_dt *dtp, const char *source, int kind)
   buffer = select_buffer (dtp, &f, precision, buf_stack, &buf_size, kind);
   
   get_float_string (dtp, &f, source , kind, 1, buffer,
-                           precision, buf_size, result, &res_len);
-  write_float_string (dtp, result, res_len);
+                           precision, buf_size, result, &flt_str_len);
+  write_float_string (dtp, result, flt_str_len);
 
   dtp->u.p.scale_factor = orig_scale;
   if (buf_size > BUF_STACK_SZ)
@@ -1734,7 +1733,7 @@ write_real_g0 (st_parameter_dt *dtp, const char *source, int kind, int d)
   char buf_stack[BUF_STACK_SZ];
   char str_buf[BUF_STACK_SZ];
   char *buffer, *result;
-  size_t buf_size, res_len;
+  size_t buf_size, res_len, flt_str_len;
   int comp_d;
   set_fnode_default (dtp, &f, kind);
 
@@ -1758,8 +1757,8 @@ write_real_g0 (st_parameter_dt *dtp, const char *source, int kind, int d)
   buffer = select_buffer (dtp, &f, precision, buf_stack, &buf_size, kind);
 
   get_float_string (dtp, &f, source , kind, comp_d, buffer,
-                           precision, buf_size, result, &res_len);
-  write_float_string (dtp, result, res_len);
+                           precision, buf_size, result, &flt_str_len);
+  write_float_string (dtp, result, flt_str_len);
 
   dtp->u.p.g0_no_blanks = 0;
   if (buf_size > BUF_STACK_SZ)
@@ -1784,7 +1783,7 @@ write_complex (st_parameter_dt *dtp, const char *source, int kind, size_t size)
   char str1_buf[BUF_STACK_SZ];
   char str2_buf[BUF_STACK_SZ];
   char *buffer, *result1, *result2;
-  size_t buf_size, res_len1, res_len2;
+  size_t buf_size, res_len1, res_len2, flt_str_len1, flt_str_len2;
   int width, lblanks, orig_scale = dtp->u.p.scale_factor;
 
   dtp->u.p.scale_factor = 1;
@@ -1807,18 +1806,18 @@ write_complex (st_parameter_dt *dtp, const char *source, int kind, size_t size)
   buffer = select_buffer (dtp, &f, precision, buf_stack, &buf_size, kind);
 
   get_float_string (dtp, &f, source , kind, 0, buffer,
-                           precision, buf_size, result1, &res_len1);
+                           precision, buf_size, result1, &flt_str_len1);
   get_float_string (dtp, &f, source + size / 2 , kind, 0, buffer,
-                           precision, buf_size, result2, &res_len2);
+                           precision, buf_size, result2, &flt_str_len2);
   if (!dtp->u.p.namelist_mode)
     {
-      lblanks = width - res_len1 - res_len2 - 3;
+      lblanks = width - flt_str_len1 - flt_str_len2 - 3;
       write_x (dtp, lblanks, lblanks);
     }
   write_char (dtp, '(');
-  write_float_string (dtp, result1, res_len1);
+  write_float_string (dtp, result1, flt_str_len1);
   write_char (dtp, semi_comma);
-  write_float_string (dtp, result2, res_len2);
+  write_float_string (dtp, result2, flt_str_len2);
   write_char (dtp, ')');
 
   dtp->u.p.scale_factor = orig_scale;
@@ -2152,14 +2151,14 @@ nml_write_obj (st_parameter_dt *dtp, namelist_info *obj, index_type offset,
 	 recursive calls to this function for arrays of derived types.
 	 Is NULL otherwise.  */
 
-      p = (void *)(obj->mem_pos + elem_ctr * obj_size);
-      p += offset;
+      p = (void *)((char*)obj->mem_pos + elem_ctr * obj_size);
+      p = (char*)p +  offset;
 
       /* Check for repeat counts of intrinsic types.  */
 
       if ((elem_ctr < (nelem - 1)) &&
 	  (obj->type != BT_DERIVED) &&
-	  !memcmp (p, (void *)(p + obj_size ), obj_size ))
+	  !memcmp (p, (void *)((char*)p + obj_size ), obj_size ))
 	{
 	  rep_ctr++;
 	}
@@ -2250,7 +2249,7 @@ nml_write_obj (st_parameter_dt *dtp, namelist_info *obj, index_type offset,
 		      child_iomsg = tmp_iomsg;
 		      child_iomsg_len = IOMSG_LEN;
 		    }
-
+		      
 		  /* Call the user defined formatted WRITE procedure.  */
 		  dtp->u.p.current_unit->child_dtio++;
 		  if (obj->type == BT_DERIVED)
@@ -2325,7 +2324,7 @@ nml_write_obj (st_parameter_dt *dtp, namelist_info *obj, index_type offset,
 		   cmp = retval)
 		{
 		  retval = nml_write_obj (dtp, cmp,
-					  (index_type)(p - obj->mem_pos),
+					  (index_type)((char*)p - (char*)obj->mem_pos),
 					  obj, ext_name);
 		}
 

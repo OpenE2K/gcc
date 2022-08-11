@@ -72,7 +72,6 @@ export_proto(string_trim);
 extern void string_minmax (gfc_charlen_type *, CHARTYPE **, int, int, ...);
 export_proto(string_minmax);
 
-
 /* Use for functions which can return a zero-length string.  */
 static CHARTYPE zero_length_string = 0;
 
@@ -277,7 +276,6 @@ string_index (gfc_charlen_type slen, const CHARTYPE *str,
   return 0;
 }
 
-
 /* Remove leading blanks from a string, padding at end.  The src and dest
    should not overlap.  */
 
@@ -410,8 +408,7 @@ string_minmax (gfc_charlen_type *rlen, CHARTYPE **dest, int op, int nargs, ...)
   *rlen = reslen;
 
   if (res == NULL)
-    runtime_error ("First argument of '%s' intrinsic should be present",
-		   op > 0 ? "MAX" : "MIN");
+    runtime_error ("First argument of '%s' intrinsic should be present", op > 0 ? "MAX" : "MIN");
 
   for (i = 1; i < nargs; i++)
     {
@@ -421,8 +418,7 @@ string_minmax (gfc_charlen_type *rlen, CHARTYPE **dest, int op, int nargs, ...)
       if (next == NULL)
 	{
 	  if (i == 1)
-	    runtime_error ("Second argument of '%s' intrinsic should be "
-			   "present", op > 0 ? "MAX" : "MIN");
+	    runtime_error ("Second argument of '%s' intrinsic should be present", op > 0 ? "MAX" : "MIN");
 	  else
 	    continue;
 	}

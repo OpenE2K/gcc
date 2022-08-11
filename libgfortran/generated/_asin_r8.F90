@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_8)
 #ifdef HAVE_ASIN
 
-elemental function _gfortran_specific__asin_r8 (parm)
+elemental function _lfortran_specific__asin_r8 (parm)
    real (kind=8), intent (in) :: parm
-   real (kind=8) :: _gfortran_specific__asin_r8
+   real (kind=8) :: _lfortran_specific__asin_r8
 
-   _gfortran_specific__asin_r8 = asin (parm)
+   _lfortran_specific__asin_r8 = asin (parm)
 end function
 
 #endif

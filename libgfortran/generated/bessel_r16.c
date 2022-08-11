@@ -24,7 +24,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 
 
@@ -64,11 +64,9 @@ bessel_jn_r16 (gfc_array_r16 * const restrict ret, int n1, int n2, GFC_REAL_16 x
   if (unlikely (n2 < n1))
     return;
 
-  if (unlikely (compile_options.bounds_check)
-      && GFC_DESCRIPTOR_EXTENT(ret,0) != (n2-n1+1))
-    runtime_error("Incorrect extent in return value of BESSEL_JN "
-		  "(%ld vs. %ld)", (long int) n2-n1,
-		  (long int) GFC_DESCRIPTOR_EXTENT(ret,0));
+  if (unlikely (compile_options.bounds_check) && GFC_DESCRIPTOR_EXTENT(ret,0) != (n2-n1+1))
+		runtime_error("Incorrect extent in return value of BESSEL_JN (%ld vs. %ld)",
+		(long int) n2-n1, (long int) GFC_DESCRIPTOR_EXTENT(ret,0));
 
   stride = GFC_DESCRIPTOR_STRIDE(ret,0);
 
@@ -131,11 +129,9 @@ bessel_yn_r16 (gfc_array_r16 * const restrict ret, int n1, int n2,
   if (unlikely (n2 < n1))
     return;
 
-  if (unlikely (compile_options.bounds_check)
-      && GFC_DESCRIPTOR_EXTENT(ret,0) != (n2-n1+1))
-    runtime_error("Incorrect extent in return value of BESSEL_JN "
-		  "(%ld vs. %ld)", (long int) n2-n1,
-		  (long int) GFC_DESCRIPTOR_EXTENT(ret,0));
+  if (unlikely (compile_options.bounds_check) && GFC_DESCRIPTOR_EXTENT(ret,0) != (n2-n1+1))
+		runtime_error("Incorrect extent in return value of BESSEL_JN (%ld vs. %ld)", 
+		  (long int) n2-n1, (long int) GFC_DESCRIPTOR_EXTENT(ret,0));
 
   stride = GFC_DESCRIPTOR_STRIDE(ret,0);
 

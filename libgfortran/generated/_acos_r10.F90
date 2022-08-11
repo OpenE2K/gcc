@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_REAL_10)
 #ifdef HAVE_ACOSL
 
-elemental function _gfortran_specific__acos_r10 (parm)
+elemental function _lfortran_specific__acos_r10 (parm)
    real (kind=10), intent (in) :: parm
-   real (kind=10) :: _gfortran_specific__acos_r10
+   real (kind=10) :: _lfortran_specific__acos_r10
 
-   _gfortran_specific__acos_r10 = acos (parm)
+   _lfortran_specific__acos_r10 = acos (parm)
 end function
 
 #endif

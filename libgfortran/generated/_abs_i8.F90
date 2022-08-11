@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_INTEGER_8)
 
 
-elemental function _gfortran_specific__abs_i8 (parm)
+elemental function _lfortran_specific__abs_i8 (parm)
    integer (kind=8), intent (in) :: parm
-   integer (kind=8) :: _gfortran_specific__abs_i8
+   integer (kind=8) :: _lfortran_specific__abs_i8
 
-   _gfortran_specific__abs_i8 = abs (parm)
+   _lfortran_specific__abs_i8 = abs (parm)
 end function
 
 

@@ -35,11 +35,11 @@
 #if defined (HAVE_GFC_COMPLEX_10)
 #ifdef HAVE_CEXPL
 
-elemental function _gfortran_specific__exp_c10 (parm)
+elemental function _lfortran_specific__exp_c10 (parm)
    complex (kind=10), intent (in) :: parm
-   complex (kind=10) :: _gfortran_specific__exp_c10
+   complex (kind=10) :: _lfortran_specific__exp_c10
 
-   _gfortran_specific__exp_c10 = exp (parm)
+   _lfortran_specific__exp_c10 = exp (parm)
 end function
 
 #endif

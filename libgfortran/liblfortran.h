@@ -74,7 +74,7 @@ extern long double __strtold (const char *, char **);
 #define gfc_strtold strtold
 #endif
 
-#include "../gcc/fortran/libgfortran.h"
+#include "commonLibFortran.h"
 
 #include "c99_protos.h"
 
@@ -140,8 +140,8 @@ extern int __mingw_snprintf (char *, size_t, const char *, ...)
 /* For a library, a standard prefix is a requirement in order to partition
    the namespace.  IPREFIX is for symbols intended to be internal to the
    library.  */
-#define PREFIX(x)	_gfortran_ ## x
-#define IPREFIX(x)	_gfortrani_ ## x
+#define PREFIX(x)	_lfortran_ ## x
+#define IPREFIX(x)	_lfortrani_ ## x
 
 /* Magic to rename a symbol at the compiler level.  You continue to refer
    to the symbol as OLD in the source, but it'll be named NEW in the asm.  */
@@ -257,10 +257,15 @@ typedef ptrdiff_t index_type;
 /* The type used for the lengths of character variables.  */
 typedef GFC_INTEGER_4 gfc_charlen_type;
 
-/* Definitions of CHARACTER data types:
-     - CHARACTER(KIND=1) corresponds to the C char type,
-     - CHARACTER(KIND=4) corresponds to an unsigned 32-bit integer.  */
-typedef GFC_UINTEGER_4 gfc_char4_t;
+#ifdef _WIN32
+typedef wchar_t gfc_char4_t; /* MinGW and MSDEV */
+#elif __LCC__
+typedef int gfc_char4_t;
+#elif __x86_64__
+typedef int gfc_char4_t;
+#else
+typedef long int gfc_char4_t;
+#endif
 
 /* Byte size of character kinds.  For the kinds currently supported, it's
    simply equal to the kind parameter itself.  */
@@ -539,6 +544,7 @@ typedef struct
   int max_subrecord_length;
   int bounds_check;
   int fpe_summary;
+  int lang_message; //ADDED. Means language of diagnostic messages: 0 - english, 1 - russian koi8, 2 - russian utf8
 }
 compile_options_t;
 
@@ -679,10 +685,10 @@ internal_proto(show_backtrace);
 #define GFC_OTOA_BUF_SIZE (GFC_LARGEST_BUF * 3 + 1)
 #define GFC_BTOA_BUF_SIZE (GFC_LARGEST_BUF * 8 + 1)
 
-extern _Noreturn void sys_abort (void);
+extern  void sys_abort (void);
 internal_proto(sys_abort);
 
-extern _Noreturn void exit_error (int);
+extern  void exit_error (int);
 internal_proto(exit_error);
 
 extern ssize_t estr_write (const char *);
@@ -698,17 +704,17 @@ internal_proto(st_printf);
 extern const char *gfc_xtoa (GFC_UINTEGER_LARGEST, char *, size_t);
 internal_proto(gfc_xtoa);
 
-extern _Noreturn void os_error (const char *);
+extern  void os_error (const char *);
 iexport_proto(os_error);
 
 extern void show_locus (st_parameter_common *);
 internal_proto(show_locus);
 
-extern _Noreturn void runtime_error (const char *, ...)
+extern  void runtime_error (const char *, ...)
      __attribute__ ((format (gfc_printf, 1, 2)));
 iexport_proto(runtime_error);
 
-extern _Noreturn void runtime_error_at (const char *, const char *, ...)
+extern  void runtime_error_at (const char *, const char *, ...)
      __attribute__ ((format (gfc_printf, 2, 3)));
 iexport_proto(runtime_error_at);
 
@@ -716,7 +722,7 @@ extern void runtime_warning_at (const char *, const char *, ...)
      __attribute__ ((format (gfc_printf, 2, 3)));
 iexport_proto(runtime_warning_at);
 
-extern _Noreturn void internal_error (st_parameter_common *, const char *);
+extern  void internal_error (st_parameter_common *, const char *);
 internal_proto(internal_error);
 
 extern const char *translate_error (int);
@@ -798,6 +804,9 @@ internal_proto(xcalloc);
 extern void *xrealloc (void *, size_t);
 internal_proto(xrealloc);
 
+extern void internal_free (void *);
+export_proto(internal_free);
+
 /* environ.c */
 
 extern void init_variables (void);
@@ -808,7 +817,9 @@ internal_proto(get_unformatted_convert);
 
 /* Secure getenv() which returns NULL if running as SUID/SGID.  */
 #ifndef HAVE_SECURE_GETENV
-#if defined(HAVE_GETUID) && defined(HAVE_GETEUID) \
+#ifdef HAVE___SECURE_GETENV
+#define secure_getenv __secure_getenv
+#elif defined(HAVE_GETUID) && defined(HAVE_GETEUID) \
   && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
 #define FALLBACK_SECURE_GETENV
 extern char *secure_getenv (const char *);
@@ -870,7 +881,7 @@ internal_proto(filename_from_unit);
 
 /* stop.c */
 
-extern _Noreturn void stop_string (const char *, GFC_INTEGER_4);
+extern  void stop_string (const char *, GFC_INTEGER_4);
 export_proto(stop_string);
 
 /* reshape_packed.c */
@@ -905,12 +916,12 @@ internal_proto(internal_pack_r4);
 GFC_REAL_8 *internal_pack_r8 (gfc_array_r8 *);
 internal_proto(internal_pack_r8);
 
-#if defined HAVE_GFC_REAL_10
+#if defined HAVE_GFC_REAL_10 && !defined(GFC_REAL_16_IS_FLOAT128)
 GFC_REAL_10 *internal_pack_r10 (gfc_array_r10 *);
 internal_proto(internal_pack_r10);
 #endif
 
-#if defined HAVE_GFC_REAL_16
+#if defined HAVE_GFC_REAL_16 && !defined(GFC_REAL_16_IS_FLOAT128) && defined(HAVE_FLOAT128)
 GFC_REAL_16 *internal_pack_r16 (gfc_array_r16 *);
 internal_proto(internal_pack_r16);
 #endif
@@ -921,12 +932,12 @@ internal_proto(internal_pack_c4);
 GFC_COMPLEX_8 *internal_pack_c8 (gfc_array_c8 *);
 internal_proto(internal_pack_c8);
 
-#if defined HAVE_GFC_COMPLEX_10
+#if defined HAVE_GFC_COMPLEX_10 && !defined(GFC_REAL_16_IS_FLOAT128)
 GFC_COMPLEX_10 *internal_pack_c10 (gfc_array_c10 *);
 internal_proto(internal_pack_c10);
 #endif
 
-#if defined HAVE_GFC_COMPLEX_16
+#if defined HAVE_GFC_COMPLEX_16 && !defined(GFC_REAL_16_IS_FLOAT128) && defined(HAVE_FLOAT128)
 GFC_COMPLEX_16 *internal_pack_c16 (gfc_array_c16 *);
 internal_proto(internal_pack_c16);
 #endif
@@ -954,12 +965,12 @@ internal_proto(internal_unpack_r4);
 extern void internal_unpack_r8 (gfc_array_r8 *, const GFC_REAL_8 *);
 internal_proto(internal_unpack_r8);
 
-#if defined HAVE_GFC_REAL_10
+#if defined HAVE_GFC_REAL_10 && !defined(GFC_REAL_16_IS_FLOAT128)
 extern void internal_unpack_r10 (gfc_array_r10 *, const GFC_REAL_10 *);
 internal_proto(internal_unpack_r10);
 #endif
 
-#if defined HAVE_GFC_REAL_16
+#if defined HAVE_GFC_REAL_16 && !defined(GFC_REAL_16_IS_FLOAT128) && defined(HAVE_FLOAT128)
 extern void internal_unpack_r16 (gfc_array_r16 *, const GFC_REAL_16 *);
 internal_proto(internal_unpack_r16);
 #endif
@@ -970,12 +981,12 @@ internal_proto(internal_unpack_c4);
 extern void internal_unpack_c8 (gfc_array_c8 *, const GFC_COMPLEX_8 *);
 internal_proto(internal_unpack_c8);
 
-#if defined HAVE_GFC_COMPLEX_10
+#if defined HAVE_GFC_COMPLEX_10 && !defined(GFC_REAL_16_IS_FLOAT128)
 extern void internal_unpack_c10 (gfc_array_c10 *, const GFC_COMPLEX_10 *);
 internal_proto(internal_unpack_c10);
 #endif
 
-#if defined HAVE_GFC_COMPLEX_16
+#if defined HAVE_GFC_COMPLEX_16 && !defined(GFC_REAL_16_IS_FLOAT128) && defined(HAVE_FLOAT128)
 extern void internal_unpack_c16 (gfc_array_c16 *, const GFC_COMPLEX_16 *);
 internal_proto(internal_unpack_c16);
 #endif
@@ -1392,12 +1403,12 @@ internal_proto(cshift0_r4);
 void cshift0_r8 (gfc_array_r8 *, const gfc_array_r8 *, ptrdiff_t, int);
 internal_proto(cshift0_r8);
 
-#ifdef HAVE_GFC_REAL_10
+#if defined HAVE_GFC_REAL_10 && !defined(GFC_REAL_16_IS_FLOAT128)
 void cshift0_r10 (gfc_array_r10 *, const gfc_array_r10 *, ptrdiff_t, int);
 internal_proto(cshift0_r10);
 #endif
 
-#ifdef HAVE_GFC_REAL_16
+#if defined HAVE_GFC_REAL_16 && !defined(GFC_REAL_16_IS_FLOAT128) && defined(HAVE_FLOAT128)
 void cshift0_r16 (gfc_array_r16 *, const gfc_array_r16 *, ptrdiff_t, int);
 internal_proto(cshift0_r16);
 #endif
@@ -1408,14 +1419,30 @@ internal_proto(cshift0_c4);
 void cshift0_c8 (gfc_array_c8 *, const gfc_array_c8 *, ptrdiff_t, int);
 internal_proto(cshift0_c8);
 
-#ifdef HAVE_GFC_COMPLEX_10
+#if defined HAVE_GFC_COMPLEX_10 && !defined(GFC_REAL_16_IS_FLOAT128)
 void cshift0_c10 (gfc_array_c10 *, const gfc_array_c10 *, ptrdiff_t, int);
 internal_proto(cshift0_c10);
 #endif
 
-#ifdef HAVE_GFC_COMPLEX_16
+#if defined HAVE_GFC_COMPLEX_16 && !defined(GFC_REAL_16_IS_FLOAT128) && defined(HAVE_FLOAT128)
 void cshift0_c16 (gfc_array_c16 *, const gfc_array_c16 *, ptrdiff_t, int);
 internal_proto(cshift0_c16);
 #endif
+
+//ADDED
+# define _(msgid) get_mess_text (msgid)
+
+enum locale_type
+{
+	LOCALE_ENG,
+	LOCALE_RU_KOI8,
+	LOCALE_RU_UTF8
+};
+
+const char* get_mess_text(const char* mess);
+export_proto(get_mess_text);
+
+void init_ru_messages (void);
+internal_proto(init_ru_messages);
 
 #endif  /* LIBGFOR_H  */

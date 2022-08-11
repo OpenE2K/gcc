@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <string.h>
 
 
@@ -178,8 +178,7 @@ pack_c10 (gfc_array_c10 *ret, const gfc_array_c10 *array,
 
 	  ret_extent = GFC_DESCRIPTOR_EXTENT(ret,0);
 	  if (total != ret_extent)
-	    runtime_error ("Incorrect extent in return value of PACK intrinsic;"
-			   " is %ld, should be %ld", (long int) total,
+	    runtime_error ("Incorrect extent in return value of PACK intrinsic; is %ld, should be %ld", (long int) total,
 			   (long int) ret_extent);
 	}
     }

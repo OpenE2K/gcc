@@ -23,7 +23,7 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 #include <errno.h>
 
 #ifndef SIZE_MAX
@@ -99,4 +99,12 @@ xrealloc (void *ptr, size_t size)
     os_error ("Memory allocation failure in xrealloc");
 
   return newp;
+}
+
+/* Free allocated in liblfortran memory. */
+
+void internal_free (void *mem)
+{
+	if (mem != NULL)
+		free (mem);
 }

@@ -24,12 +24,11 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
 
-#include "libgfortran.h"
+#include "liblfortran.h"
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-
 
 /* SUBROUTINE UMASK(MASK, OLD)
    INTEGER, INTENT(IN) :: MASK
