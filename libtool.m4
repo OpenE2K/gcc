@@ -3653,7 +3653,7 @@ m4_if([$1], [CXX], [
     *qnx* | *nto*)
       # QNX uses GNU C++, but need to define -shared option too, otherwise
       # it will coredump.
-      _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
+      _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
       ;;
     *)
       _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
@@ -3803,7 +3803,7 @@ m4_if([$1], [CXX], [
       *qnx* | *nto*)
         # QNX uses GNU C++, but need to define -shared option too, otherwise
         # it will coredump.
-        _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
+        _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
         ;;
       osf3* | osf4* | osf5*)
 	case $cc_basename in
@@ -3970,7 +3970,7 @@ m4_if([$1], [CXX], [
     *nto* | *qnx*)
       # QNX uses GNU C++, but need to define -shared option too, otherwise
       # it will coredump.
-      _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
+      _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
       ;;
 
     sysv4*MP*)
@@ -4098,7 +4098,7 @@ m4_if([$1], [CXX], [
     *nto* | *qnx*)
       # QNX uses GNU C++, but need to define -shared option too, otherwise
       # it will coredump.
-      _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
+      _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
       ;;
 
     osf3* | osf4* | osf5*)

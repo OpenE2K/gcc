@@ -1,0 +1,3 @@
+GCC_CFLAGS =  -DIN_GCC    -W -Wall -Wwrite-strings -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition  -isystem ./include 
+INHIBIT_LIBC_CFLAGS = 
+TARGET_SYSTEM_ROOT = 

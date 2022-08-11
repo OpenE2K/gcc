@@ -1,0 +1,5 @@
+# Provide fallbacks for __builtin_copysignq, __builtin_fabsq
+# and __builtin_signbitq.
+LIB2ADD += $(srcdir)/config/e2k/tf-signs.c
+
+LIB2ADD += $(srcdir)/config/e2k/sfp-exceptions.c

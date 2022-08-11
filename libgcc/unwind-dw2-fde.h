@@ -39,9 +39,15 @@ struct fde_vector
 
 struct object
 {
+#if ! (defined (__e2k__) && defined (__ptr128__))
   void *pc_begin;
   void *tbase;
   void *dbase;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  _Unwind_Ptr pc_begin;
+  _Unwind_Ptr tbase;
+  _Unwind_Ptr dbase;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
   union {
     const struct dwarf_fde *single;
     struct dwarf_fde **array;
@@ -84,18 +90,33 @@ struct old_object
 
 struct dwarf_eh_bases
 {
+#if ! (defined (__e2k__) && defined (__ptr128__))
   void *tbase;
   void *dbase;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  _Unwind_Ptr tbase;
+  _Unwind_Ptr dbase;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
   void *func;
 };
 
 
 extern void __register_frame_info_bases (const void *, struct object *,
-					 void *, void *);
+#if ! (defined (__e2k__) && defined (__ptr128__))
+					 void *, void *
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+					 _Unwind_Ptr, _Unwind_Ptr
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+					 );
 extern void __register_frame_info (const void *, struct object *);
 extern void __register_frame (void *);
 extern void __register_frame_info_table_bases (void *, struct object *,
-					       void *, void *);
+#if ! (defined (__e2k__) && defined (__ptr128__))
+					       void *, void *
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+					       _Unwind_Ptr, _Unwind_Ptr
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+					       );
 extern void __register_frame_info_table (void *, struct object *);
 extern void __register_frame_table (void *);
 extern void *__deregister_frame_info (const void *);
@@ -105,7 +126,11 @@ extern void __deregister_frame (void *);
 
 typedef          int  sword __attribute__ ((mode (SI)));
 typedef unsigned int  uword __attribute__ ((mode (SI)));
-typedef unsigned int  uaddr __attribute__ ((mode (pointer)));
+typedef unsigned int  uaddr
+#if ! (defined (__e2k__) && defined (__ptr128__))
+__attribute__ ((mode (pointer)))
+#endif /* ! (defined (__e2k__) && defined (__ptr128__))  */
+  ;
 typedef          int  saddr __attribute__ ((mode (pointer)));
 typedef unsigned char ubyte;
 
@@ -163,7 +188,13 @@ next_fde (const fde *f)
   return (const fde *) ((const char *) f + f->length + sizeof (f->length));
 }
 
-extern const fde * _Unwind_Find_FDE (void *, struct dwarf_eh_bases *);
+extern const fde * _Unwind_Find_FDE (
+#if ! (defined (__e2k__) && defined (__ptr128__))
+				     void *,
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+				     _Unwind_Ptr,
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+				     struct dwarf_eh_bases *);
 
 static inline int
 last_fde (struct object *obj __attribute__ ((__unused__)), const fde *f)

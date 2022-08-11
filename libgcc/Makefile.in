@@ -239,8 +239,8 @@ endif
 
 # Options to use when compiling libgcc2.a.
 #
-LIBGCC2_DEBUG_CFLAGS = -g
-LIBGCC2_CFLAGS = -O2 $(LIBGCC2_INCLUDES) $(GCC_CFLAGS) $(HOST_LIBGCC2_CFLAGS) \
+LIBGCC2_DEBUG_CFLAGS =
+LIBGCC2_CFLAGS = $(LIBGCC2_INCLUDES) $(GCC_CFLAGS) $(HOST_LIBGCC2_CFLAGS) \
 		 $(LIBGCC2_DEBUG_CFLAGS) -DIN_LIBGCC2 \
 		 -fbuilding-libgcc -fno-stack-protector \
 		 $(INHIBIT_LIBC_CFLAGS)
@@ -290,17 +290,17 @@ INTERNAL_CFLAGS = $(CFLAGS) $(LIBGCC2_CFLAGS) $(HOST_LIBGCC2_CFLAGS) \
 		  $(INCLUDES) @set_have_cc_tls@ @set_use_emutls@
 
 # Options to use when compiling crtbegin/end.
-CRTSTUFF_CFLAGS = -O2 $(GCC_CFLAGS) $(INCLUDES) $(MULTILIB_CFLAGS) -g0 \
+CRTSTUFF_CFLAGS = $(GCC_CFLAGS) $(INCLUDES) $(MULTILIB_CFLAGS) -g0 \
   $(NO_PIE_CFLAGS) -finhibit-size-directive -fno-inline -fno-exceptions \
-  -fno-zero-initialized-in-bss -fno-toplevel-reorder -fno-tree-vectorize \
+  -fno-toplevel-reorder \
   -fbuilding-libgcc -fno-stack-protector $(FORCE_EXPLICIT_EH_REGISTRY) \
   $(INHIBIT_LIBC_CFLAGS)
 
 # Extra flags to use when compiling crt{begin,end}.o.
 CRTSTUFF_T_CFLAGS =
 
-MULTIDIR := $(shell $(CC) $(CFLAGS) -print-multi-directory)
-MULTIOSDIR := $(shell $(CC) $(CFLAGS) -print-multi-os-directory)
+MULTIDIR := .
+MULTIOSDIR := .
 
 MULTIOSSUBDIR := $(shell if test $(MULTIOSDIR) != .; then echo /$(MULTIOSDIR); fi)
 inst_libdir = $(libsubdir)$(MULTISUBDIR)
@@ -425,9 +425,9 @@ LIB2ADD += enable-execute-stack.c
 # While emutls.c has nothing to do with EH, it is in LIB2ADDEH*
 # instead of LIB2ADD because that's the way to be sure on some targets
 # (e.g. *-*-darwin*) only one copy of it is linked.
-LIB2ADDEH += $(srcdir)/emutls.c
-LIB2ADDEHSTATIC += $(srcdir)/emutls.c
-LIB2ADDEHSHARED += $(srcdir)/emutls.c
+# LIB2ADDEH += $(srcdir)/emutls.c
+# LIB2ADDEHSTATIC += $(srcdir)/emutls.c
+# LIB2ADDEHSHARED += $(srcdir)/emutls.c
 
 # Library members defined in libgcc2.c.
 lib2funcs = _muldi3 _negdi2 _lshrdi3 _ashldi3 _ashrdi3 _cmpdi2 _ucmpdi2	   \

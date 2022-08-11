@@ -1,0 +1,2 @@
+crtalign.o: $(srcdir)/config/e2k/crtalign.S
+	$(gcc_compile) -c -x assembler-with-cpp $<

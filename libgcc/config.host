@@ -484,6 +484,10 @@ cris-*-elf)
 cris-*-linux* | crisv32-*-linux*)
 	tmake_file="$tmake_file cris/t-cris t-softfp-sfdf t-softfp cris/t-linux"
 	;;
+e2k-mcst-linux-gnu)
+	tmake_file="$tmake_file e2k/t-eh-e2k e2k/t-crtalign t-softfp-tf e2k/t-softfp t-softfp e2k/t-linux"
+	extra_parts="$extra_parts crtalign.o"
+	;;
 epiphany-*-elf* | epiphany-*-rtems*)
 	tmake_file="$tmake_file epiphany/t-epiphany t-fdpbit epiphany/t-custom-eqsf"
 	extra_parts="$extra_parts crti.o crtint.o crtrunc.o crtm1reg-r43.o crtm1reg-r63.o crtn.o"
@@ -1195,7 +1199,7 @@ sparc-*-elf*)
 	extra_parts="$extra_parts crti.o crtn.o crtfastmath.o"
 	;;
 sparc-*-linux*)		# SPARC's running GNU/Linux, libc6
-	tmake_file="${tmake_file} t-crtfm"
+	tmake_file="${tmake_file} t-crtfm sparc/t-crtunaligned"
 	if test "${host_address}" = 64; then
 		tmake_file="$tmake_file sparc/t-linux64"
 	fi
@@ -1216,7 +1220,7 @@ sparc-*-linux*)		# SPARC's running GNU/Linux, libc6
 		fi
 	  	;;
 	esac
-	extra_parts="$extra_parts crtfastmath.o"
+	extra_parts="$extra_parts crtfastmath.o crtunaligned.o"
 	md_unwind_header=sparc/linux-unwind.h
 	;;
 sparc-*-rtems*)
@@ -1243,8 +1247,8 @@ sparc64-*-freebsd*|ultrasparc-*-freebsd*)
 	extra_parts="$extra_parts crtfastmath.o"
 	;;
 sparc64-*-linux*)		# 64-bit SPARC's running GNU/Linux
-	extra_parts="$extra_parts crtfastmath.o"
-	tmake_file="${tmake_file} t-crtfm sparc/t-linux"
+	extra_parts="$extra_parts crtfastmath.o crtunaligned.o"
+	tmake_file="${tmake_file} t-crtfm sparc/t-linux sparc/t-crtunaligned"
 	if test "${host_address}" = 64; then
 		tmake_file="${tmake_file} sparc/t-linux64"
 	fi

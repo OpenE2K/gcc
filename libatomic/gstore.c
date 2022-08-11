@@ -78,6 +78,14 @@
       }								\
   } while (0)
 
+#if (defined __LCC__) && (defined __ptr128__)
+#undef LARGER
+#define LARGER(N)						\
+  do {								\
+    /* do nothing (bug #114558) */				\
+  } while (0)
+#endif /* __LCC__ */
+
 
 void
 libat_store (size_t n, void *mptr, void *vptr, int smodel)
@@ -89,7 +97,11 @@ libat_store (size_t n, void *mptr, void *vptr, int smodel)
     case 2:		EXACT(2);	goto L4;
     case 4:		EXACT(4);	goto L8;
     case 8:		EXACT(8);	goto L16;
+#if defined(__LCC__) && defined(__ptr128__) && (! HAVE_ATOMIC_LDST_16)
+    case 16: /* do nothing (mcstbug #125743.4) */ break;
+#else
     case 16:		EXACT(16);	break;
+#endif
 
     case 3: L4:		LARGER(4);	/* FALLTHRU */
     case 5 ... 7: L8:	LARGER(8);	/* FALLTHRU */

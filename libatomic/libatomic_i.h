@@ -213,6 +213,15 @@ DECLARE_ALL_SIZED(4);
 DECLARE_ALL_SIZED(8);
 DECLARE_ALL_SIZED(16);
 
+#if defined(__LCC__) && !defined(__OPTIMIZE__) /* См. bug #89377, #87484.5. */
+#if !HAVE_INT16 /* Чтобы не сломать сборку при включении поддержки __int128. */
+#define libat_load_16 ((__typeof__(libat_load_16) *)0)
+#define libat_store_16 ((__typeof__(libat_store_16) *)0)
+#define libat_exchange_16 ((__typeof__(libat_exchange_16) *)0)
+#define libat_compare_exchange_16 ((__typeof__(libat_compare_exchange_16) *)0)
+#endif /* !HAVE_INT16 */
+#endif /* defined(__LCC__) && !defined(__OPTIMIZE__) */
+
 #undef DECLARE_1
 #undef DECLARE_ALL_SIZED
 #undef DECLARE_ALL_SIZED_

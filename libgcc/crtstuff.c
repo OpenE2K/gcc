@@ -62,6 +62,11 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #include "coretypes.h"
 #include "tm.h"
 #include "libgcc_tm.h"
+
+#if defined (__e2k__) && defined (__ptr128__)
+/* Required because of `_Unwind_Ptr'.  */
+# include "unwind.h"
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 #include "unwind-dw2-fde.h"
 
 #ifndef FORCE_CODE_SECTION_ALIGN
@@ -180,7 +185,12 @@ call_ ## FUNC (void)					\
 extern void __register_frame_info (const void *, struct object *)
 				  TARGET_ATTRIBUTE_WEAK;
 extern void __register_frame_info_bases (const void *, struct object *,
-					 void *, void *)
+# if ! (defined (__e2k__) && defined (__ptr128__))
+					 void *, void *
+# else /* defined (__e2k__) && defined (__ptr128__)  */
+					 _Unwind_Ptr, _Unwind_Ptr
+# endif /* defined (__e2k__) && defined (__ptr128__)  */
+					 )
 				  TARGET_ATTRIBUTE_WEAK;
 extern void *__deregister_frame_info (const void *)
 				     TARGET_ATTRIBUTE_WEAK;

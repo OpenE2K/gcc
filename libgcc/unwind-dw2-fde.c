@@ -83,13 +83,22 @@ static __gthread_mutex_t object_mutex;
 
 void
 __register_frame_info_bases (const void *begin, struct object *ob,
-			     void *tbase, void *dbase)
+#if ! (defined (__e2k__) && defined (__ptr128__))
+			     void *tbase, void *dbase
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+			     _Unwind_Ptr tbase, _Unwind_Ptr dbase
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+			     )
 {
   /* If .eh_frame is empty, don't register at all.  */
   if ((const uword *) begin == 0 || *(const uword *) begin == 0)
     return;
 
+#if ! (defined (__e2k__) && defined (__ptr128__))
   ob->pc_begin = (void *)-1;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  ob->pc_begin = (_Unwind_Ptr) -1;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
   ob->tbase = tbase;
   ob->dbase = dbase;
   ob->u.single = begin;
@@ -121,7 +130,31 @@ __register_frame_info_bases (const void *begin, struct object *ob,
 void
 __register_frame_info (const void *begin, struct object *ob)
 {
-  __register_frame_info_bases (begin, ob, 0, 0);
+#if defined (__e2k__) && defined (__ptr128__)
+  _Unwind_Ptr tbase;
+  _Unwind_Ptr dbase;
+
+  tbase = ({
+      register unsigned long cud;
+      asm volatile ("rrd %%cud.lo, %0" : "=r" (cud));
+      (_Unwind_Ptr) (cud & 0xffffffff);
+    });
+
+  dbase = ({
+      register unsigned long gd;
+      asm volatile ("rrd %%gd.lo, %0" : "=r" (gd));
+      (_Unwind_Ptr) (gd & 0xffffffff);
+    });
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+
+  __register_frame_info_bases (begin, ob,
+#if ! (defined (__e2k__) && defined (__ptr128__))
+			       0, 0
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+			       tbase, dbase
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+			       );
+
 }
 
 void
@@ -143,9 +176,18 @@ __register_frame (void *begin)
 
 void
 __register_frame_info_table_bases (void *begin, struct object *ob,
-				   void *tbase, void *dbase)
+#if ! (defined (__e2k__) && defined (__ptr128__))
+				   void *tbase, void *dbase
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+				   _Unwind_Ptr tbase, _Unwind_Ptr dbase
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+				   )
 {
+#if ! (defined (__e2k__) && defined (__ptr128__))
   ob->pc_begin = (void *)-1;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  ob->pc_begin = (_Unwind_Ptr) -1;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
   ob->tbase = tbase;
   ob->dbase = dbase;
   ob->u.array = begin;
@@ -272,9 +314,19 @@ base_from_object (unsigned char encoding, struct object *ob)
   switch (encoding & 0x70)
     {
     case DW_EH_PE_absptr:
+#if ! (defined (__e2k__) && defined (__ptr128__))
     case DW_EH_PE_pcrel:
+#endif /* ! (defined (__e2k__) && defined (__ptr128__))  */
     case DW_EH_PE_aligned:
       return 0;
+
+#if defined (__e2k__) && defined (__ptr128__)
+    case DW_EH_PE_pcrel:
+      /* Take into account that in PM the value calculated by means of the
+	 relative encoding and the current position in `.eh_frame' belong to
+	 different segments.  */
+      return (_Unwind_Ptr) ob->tbase - (_Unwind_Ptr) ob->dbase;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 
     case DW_EH_PE_textrel:
       return (_Unwind_Ptr) ob->tbase;
@@ -292,7 +344,11 @@ static int
 get_cie_encoding (const struct dwarf_cie *cie)
 {
   const unsigned char *aug, *p;
+#if ! (defined (__e2k__) && defined (__ptr128__))
   _Unwind_Ptr dummy;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  void *dummy;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
   _uleb128_t utmp;
   _sleb128_t stmp;
 
@@ -329,7 +385,13 @@ get_cie_encoding (const struct dwarf_cie *cie)
 	  /* ??? Avoid dereferencing indirect pointers, since we're
 	     faking the base address.  Gotta keep DW_EH_PE_aligned
 	     intact, however.  */
-	  p = read_encoded_value_with_base (*p & 0x7F, 0, p + 1, &dummy);
+	  p =
+#if ! (defined (__e2k__) && defined (__ptr128__))
+	    read_encoded_value_with_base
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+	    read_encoded_ptr_with_base
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+	    (*p & 0x7F, 0, p + 1, &dummy);
 	}
       /* LSDA encoding.  */
       else if (*aug == 'L')
@@ -671,17 +733,30 @@ classify_object_over_fdes (struct object *ob, const fde *this_fde)
 	 the encoding is smaller than a pointer a true NULL may not
 	 be representable.  Assume 0 in the representable bits is NULL.  */
       mask = size_of_encoded_value (encoding);
+
+      /* FIXME: in PM `size_of_encoded_value ()' returns 8, which is probably
+	 unreasonably large and should be fixed. This makes the calculations
+	 below result in an unexpected `mask == 0' somehow taking into account
+	 that `_Unwind_Ptr' is a 32-bit type. Temporarely overcome this issue
+	 this way . . .  */
+#if ! (defined (__e2k__) && defined (__ptr128__))
       if (mask < sizeof (void *))
 	mask = (((_Unwind_Ptr) 1) << (mask << 3)) - 1;
       else
+#endif /* ! (defined (__e2k__) && defined (__ptr128__))  */
 	mask = -1;
 
       if ((pc_begin & mask) == 0)
 	continue;
 
       count += 1;
+#if ! (defined (__e2k__) && defined (__ptr128__))
       if ((void *) pc_begin < ob->pc_begin)
 	ob->pc_begin = (void *) pc_begin;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+      if (pc_begin < ob->pc_begin)
+	ob->pc_begin = pc_begin;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
     }
 
   return count;
@@ -733,10 +808,14 @@ add_fdes (struct object *ob, struct fde_accumulator *accu, const fde *this_fde)
 	     In these cases, the function address will be NULL, but if
 	     the encoding is smaller than a pointer a true NULL may not
 	     be representable.  Assume 0 in the representable bits is NULL.  */
+
 	  mask = size_of_encoded_value (encoding);
+	  /* See above.  */
+#if ! (defined (__e2k__) &&  defined (__ptr128__))
 	  if (mask < sizeof (void *))
 	    mask = (((_Unwind_Ptr) 1) << (mask << 3)) - 1;
 	  else
+#endif /* defined (__e2k__) &&  defined (__ptr128__)  */
 	    mask = -1;
 
 	  if ((pc_begin & mask) == 0)
@@ -823,7 +902,13 @@ init_object (struct object* ob)
    array.  */
 
 static const fde *
-linear_search_fdes (struct object *ob, const fde *this_fde, void *pc)
+linear_search_fdes (struct object *ob, const fde *this_fde,
+#if ! (defined (__e2k__) && defined (__ptr128__))
+		    void *pc
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+		    _Unwind_Ptr pc
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+		    )
 {
   const struct dwarf_cie *last_cie = 0;
   int encoding = ob->s.b.encoding;
@@ -893,7 +978,13 @@ linear_search_fdes (struct object *ob, const fde *this_fde, void *pc)
    implementations of increasing complexity.  */
 
 static inline const fde *
-binary_search_unencoded_fdes (struct object *ob, void *pc)
+binary_search_unencoded_fdes (struct object *ob,
+#if ! (defined (__e2k__) && defined (__ptr128__))
+			      void *pc
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+			      _Unwind_Ptr pc
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+			      )
 {
   struct fde_vector *vec = ob->u.sort;
   size_t lo, hi;
@@ -902,9 +993,19 @@ binary_search_unencoded_fdes (struct object *ob, void *pc)
     {
       size_t i = (lo + hi) / 2;
       const fde *const f = vec->array[i];
+#if ! (defined (__e2k__) && defined (__ptr128__))
       void *pc_begin;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+	_Unwind_Ptr pc_begin;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
       uaddr pc_range;
-      memcpy (&pc_begin, (const void * const *) f->pc_begin, sizeof (void *));
+      memcpy (&pc_begin,
+#if ! (defined (__e2k__) && defined (__ptr128__))
+	      (const void * const *) f->pc_begin, sizeof (void *)
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+	      (const _Unwind_Ptr *) f->pc_begin, sizeof (_Unwind_Ptr)
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+	      );
       memcpy (&pc_range, (const uaddr *) f->pc_begin + 1, sizeof (uaddr));
 
       if (pc < pc_begin)
@@ -919,7 +1020,13 @@ binary_search_unencoded_fdes (struct object *ob, void *pc)
 }
 
 static inline const fde *
-binary_search_single_encoding_fdes (struct object *ob, void *pc)
+binary_search_single_encoding_fdes (struct object *ob,
+#if ! (defined (__e2k__) && defined (__ptr128__))
+				    void *pc
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+				    _Unwind_Ptr pc
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+				    )
 {
   struct fde_vector *vec = ob->u.sort;
   int encoding = ob->s.b.encoding;
@@ -949,7 +1056,13 @@ binary_search_single_encoding_fdes (struct object *ob, void *pc)
 }
 
 static inline const fde *
-binary_search_mixed_encoding_fdes (struct object *ob, void *pc)
+binary_search_mixed_encoding_fdes (struct object *ob,
+#if ! (defined (__e2k__) && defined (__ptr128__))
+				   void *pc
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+				   _Unwind_Ptr pc
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+				   )
 {
   struct fde_vector *vec = ob->u.sort;
   size_t lo, hi;
@@ -980,7 +1093,13 @@ binary_search_mixed_encoding_fdes (struct object *ob, void *pc)
 }
 
 static const fde *
-search_object (struct object* ob, void *pc)
+search_object (struct object* ob,
+#if ! (defined (__e2k__) && defined (__ptr128__))
+	       void *pc
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+	       _Unwind_Ptr pc
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+	       )
 {
   /* If the data hasn't been sorted, try to do this now.  We may have
      more memory available than last time we tried.  */
@@ -1024,7 +1143,13 @@ search_object (struct object* ob, void *pc)
 }
 
 const fde *
-_Unwind_Find_FDE (void *pc, struct dwarf_eh_bases *bases)
+_Unwind_Find_FDE (
+#if ! (defined (__e2k__) && defined (__ptr128__))
+		  void *pc,
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+		  _Unwind_Ptr pc,
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+		  struct dwarf_eh_bases *bases)
 {
   struct object *ob;
   const fde *f = NULL;

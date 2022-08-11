@@ -31,6 +31,8 @@ typedef struct
      another register, or a location expression.  */
   struct frame_state_reg_info
   {
+    /* reg[] isn't currently used in any way on E2K.  */
+#if ! defined __e2k__
     struct {
       union {
 	_Unwind_Word reg;
@@ -47,6 +49,7 @@ typedef struct
 	REG_UNDEFINED
       } how;
     } reg[__LIBGCC_DWARF_FRAME_REGISTERS__+1];
+#endif /* ! defined __e2k__  */
 
     /* Used to implement DW_CFA_remember_state.  */
     struct frame_state_reg_info *prev;

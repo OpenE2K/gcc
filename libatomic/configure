@@ -8239,7 +8239,7 @@ $as_echo_n "checking for $compiler option to produce PIC... " >&6; }
     *nto* | *qnx*)
       # QNX uses GNU C++, but need to define -shared option too, otherwise
       # it will coredump.
-      lt_prog_compiler_pic='-fPIC -shared'
+      lt_prog_compiler_pic='-fPIC'
       ;;
 
     sysv4*MP*)
@@ -8366,7 +8366,7 @@ $as_echo_n "checking for $compiler option to produce PIC... " >&6; }
     *nto* | *qnx*)
       # QNX uses GNU C++, but need to define -shared option too, otherwise
       # it will coredump.
-      lt_prog_compiler_pic='-fPIC -shared'
+      lt_prog_compiler_pic='-fPIC'
       ;;
 
     osf3* | osf4* | osf5*)
@@ -12333,6 +12333,7 @@ _ACEOF
 
 
 
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __atomic_load/store for size 2" >&5
 $as_echo_n "checking for __atomic_load/store for size 2... " >&6; }
 if test "${libat_cv_have_at_ldst_2+set}" = set; then :
@@ -12394,6 +12395,7 @@ $as_echo "$libat_cv_have_at_ldst_2" >&6; }
 cat >>confdefs.h <<_ACEOF
 #define HAVE_ATOMIC_LDST_2 $yesno
 _ACEOF
+
 
 
 
@@ -12467,6 +12469,7 @@ _ACEOF
 
 
 
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __atomic_load/store for size 8" >&5
 $as_echo_n "checking for __atomic_load/store for size 8... " >&6; }
 if test "${libat_cv_have_at_ldst_8+set}" = set; then :
@@ -12534,6 +12537,7 @@ _ACEOF
 
 
 
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __atomic_load/store for size 16" >&5
 $as_echo_n "checking for __atomic_load/store for size 16... " >&6; }
 if test "${libat_cv_have_at_ldst_16+set}" = set; then :
@@ -12595,6 +12599,7 @@ $as_echo "$libat_cv_have_at_ldst_16" >&6; }
 cat >>confdefs.h <<_ACEOF
 #define HAVE_ATOMIC_LDST_16 $yesno
 _ACEOF
+
 
 
 
@@ -15281,7 +15286,7 @@ else
   multilib_arg=
 fi
 
-ac_config_files="$ac_config_files Makefile testsuite/Makefile"
+ac_config_files="$ac_config_files Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -16329,7 +16334,6 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "gstdint.h") CONFIG_COMMANDS="$CONFIG_COMMANDS gstdint.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "testsuite/Makefile") CONFIG_FILES="$CONFIG_FILES testsuite/Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

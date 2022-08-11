@@ -1,0 +1,2 @@
+crtunaligned.o: $(srcdir)/config/sparc/crtunaligned.c
+	$(gcc_compile) -c $<

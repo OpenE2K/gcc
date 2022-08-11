@@ -1,0 +1,6 @@
+LIB2ADDEH = $(srcdir)/config/e2k/unwind-dw2-e2k.c $(srcdir)/unwind-dw2-fde-dip.c \
+  $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
+
+# liblcc.a should be linked into libgcc_s.so for the sake of runtime support of
+# `__builtin_cpu_is ()' in the latter.
+SHLIB_LC = -llcc -lc

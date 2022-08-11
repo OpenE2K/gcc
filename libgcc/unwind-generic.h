@@ -49,10 +49,17 @@ typedef unsigned _Unwind_Word __attribute__((__mode__(__unwind_word__)));
 typedef signed _Unwind_Sword __attribute__((__mode__(__unwind_word__)));
 #if defined(__ia64__) && defined(__hpux__)
 typedef unsigned _Unwind_Ptr __attribute__((__mode__(__word__)));
-#else
+#elif ! (defined (__e2k__) && defined (__ptr128__))
 typedef unsigned _Unwind_Ptr __attribute__((__mode__(__pointer__)));
 #endif
+
+#if ! (defined (__e2k__) && defined (__ptr128__))
 typedef unsigned _Unwind_Internal_Ptr __attribute__((__mode__(__pointer__)));
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  /* We may live in 64-bit address space in PM nowadays if ELF64 is used.  */
+typedef unsigned long _Unwind_Ptr;
+typedef unsigned long _Unwind_Internal_Ptr;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 
 /* @@@ The IA-64 ABI uses a 64-bit word to identify the producer and
    consumer of an exception.  We'll go along with this for now even on
@@ -95,8 +102,13 @@ struct _Unwind_Exception
 #if !defined (__USING_SJLJ_EXCEPTIONS__) && defined (__SEH__)
   _Unwind_Word private_[6];
 #else
+# if ! (defined (__e2k__) && defined (__ptr128__))
   _Unwind_Word private_1;
   _Unwind_Word private_2;
+# else /* defined (__e2k__) && defined (__ptr128__)  */
+  void *private_1;
+  void *private_2;
+# endif /* defined (__e2k__) && defined (__ptr128__)  */
 #endif
 
   /* @@@ The IA-64 ABI says that this structure must be double-word aligned.
@@ -169,6 +181,12 @@ _Unwind_Backtrace (_Unwind_Trace_Fn, void *);
 
 extern _Unwind_Word _Unwind_GetGR (struct _Unwind_Context *, int);
 extern void _Unwind_SetGR (struct _Unwind_Context *, int, _Unwind_Word);
+
+  /* This one should be externally visible only in Protected Mode.  */
+#if defined (__e2k__) && defined (__ptr128__)
+extern void _Unwind_SetGRPtr (struct _Unwind_Context *context, int index,
+			      void *p);
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 
 extern _Unwind_Ptr _Unwind_GetIP (struct _Unwind_Context *);
 extern _Unwind_Ptr _Unwind_GetIPInfo (struct _Unwind_Context *, int *);
@@ -244,7 +262,13 @@ extern _Unwind_Ptr _Unwind_GetTextRelBase (struct _Unwind_Context *);
 
 /* @@@ Given an address, return the entry point of the function that
    contains it.  */
-extern void * _Unwind_FindEnclosingFunction (void *pc);
+extern void * _Unwind_FindEnclosingFunction (
+#if ! (defined (__e2k__) && defined (__ptr128__))
+					     void *pc
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+					     _Unwind_Ptr pc
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+					     );
 
 #ifndef __SIZEOF_LONG__
   #error "__SIZEOF_LONG__ macro not defined"
@@ -269,6 +293,9 @@ extern void * _Unwind_FindEnclosingFunction (void *pc);
 #elif __SIZEOF_LONG_LONG__ >= __SIZEOF_POINTER__
   typedef long long _sleb128_t;
   typedef unsigned long long _uleb128_t;
+#elif defined (__e2k__) && defined (__ptr128__)
+  typedef long _sleb128_t;
+  typedef unsigned long _uleb128_t;
 #else
 # error "What type shall we use for _sleb128_t?"
 #endif

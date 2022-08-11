@@ -60,7 +60,7 @@ target_triplet = @target@
 @ARCH_I386_TRUE@@HAVE_IFUNC_TRUE@am__append_2 = $(addsuffix _8_1_.lo,$(SIZEOBJS))
 @ARCH_X86_64_TRUE@@HAVE_IFUNC_TRUE@am__append_3 = $(addsuffix _16_1_.lo,$(SIZEOBJS))
 subdir = .
-DIST_COMMON = ChangeLog $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
+DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
 	$(srcdir)/auto-config.h.in $(srcdir)/../mkinstalldirs \
 	$(srcdir)/../depcomp
@@ -298,7 +298,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I .. -I ../config
-SUBDIRS = testsuite
+SUBDIRS = 
 gcc_version := $(shell @get_gcc_base_ver@ $(top_srcdir)/../gcc/BASE-VER)
 search_path = $(addprefix $(top_srcdir)/config/, $(config_path)) \
 	$(top_srcdir) $(top_builddir)

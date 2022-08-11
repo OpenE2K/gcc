@@ -263,5 +263,5 @@ else
   multilib_arg=
 fi
 
-AC_CONFIG_FILES(Makefile testsuite/Makefile)
+AC_CONFIG_FILES(Makefile)
 AC_OUTPUT

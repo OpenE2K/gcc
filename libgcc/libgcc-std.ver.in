@@ -169,12 +169,14 @@ GCC_3.0 {
   _Unwind_GetGR
   _Unwind_GetIP
   _Unwind_GetLanguageSpecificData
+  _Unwind_GetPCSP
   _Unwind_GetRegionStart
   _Unwind_GetTextRelBase
   _Unwind_GetDataRelBase
   _Unwind_RaiseException
   _Unwind_Resume
   _Unwind_SetGR
+  _Unwind_SetGRPtr
   _Unwind_SetIP
   __deregister_frame
   __deregister_frame_info

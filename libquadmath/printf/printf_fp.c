@@ -122,6 +122,63 @@ static wchar_t *group_number (wchar_t *buf, wchar_t *bufend,
 			      unsigned int intdig_no, const char *grouping,
 			      wchar_t thousands_sep, int ngroups);
 
+struct hack_digit_param
+{
+  /* Sign of the exponent.  */
+  int expsign;
+  /* The type of output format that will be used: 'e'/'E' or 'f'.  */
+  int type;
+  /* and the exponent.  */
+  int exponent;
+  /* The fraction of the floting-point value in question  */
+  MPN_VAR(frac);
+  /* Scaling factor.  */
+  MPN_VAR(scale);
+  /* Temporary bignum value.  */
+  MPN_VAR(tmp);
+};
+
+static wchar_t
+hack_digit (struct hack_digit_param *p)
+{
+  mp_limb_t hi;
+
+  if (p->expsign != 0 && p->type == 'f' && p->exponent-- > 0)
+    hi = 0;
+  else if (p->scalesize == 0)
+    {
+      hi = p->frac[p->fracsize - 1];
+      p->frac[p->fracsize - 1] = mpn_mul_1 (p->frac, p->frac, p->fracsize - 1, 10);
+    }
+  else
+    {
+      if (p->fracsize < p->scalesize)
+        hi = 0;
+      else
+        {
+          hi = mpn_divmod (p->tmp, p->frac, p->fracsize, p->scale, p->scalesize);
+          p->tmp[p->fracsize - p->scalesize] = hi;
+          hi = p->tmp[0];
+
+          p->fracsize = p->scalesize;
+          while (p->fracsize != 0 && p->frac[p->fracsize - 1] == 0)
+            --p->fracsize;
+          if (p->fracsize == 0)
+            {
+              /* We're not prepared for an mpn variable with zero
+                  limbs.  */
+              p->fracsize = 1;
+              return L_('0') + hi;
+            }
+        }
+
+      mp_limb_t _cy = mpn_mul_1 (p->frac, p->frac, p->fracsize, 10);
+      if (_cy != 0)
+        p->frac[p->fracsize++] = _cy;
+    }
+
+  return L_('0') + hi;
+}
 
 int
 __quadmath_printf_fp (struct __quadmath_printf_file *fp,
@@ -150,27 +207,13 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
   /* We need to shift the contents of fp_input by this amount of bits.	*/
   int to_shift = 0;
 
-  /* The fraction of the floting-point value in question  */
-  MPN_VAR(frac);
-  /* and the exponent.	*/
-  int exponent;
-  /* Sign of the exponent.  */
-  int expsign = 0;
+  struct hack_digit_param p;
   /* Sign of float number.  */
   int is_neg = 0;
-
-  /* Scaling factor.  */
-  MPN_VAR(scale);
-
-  /* Temporary bignum value.  */
-  MPN_VAR(tmp);
 
   /* Digit which is result of last hack_digit() call.  */
   wchar_t last_digit, next_digit;
   bool more_bits;
-
-  /* The type of output format that will be used: 'e'/'E' or 'f'.  */
-  int type;
 
   /* Counter for number of written characters.	*/
   int done = 0;
@@ -186,48 +229,7 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
   /* Flag whether wbuffer is malloc'ed or not.  */
   int buffer_malloced = 0;
 
-  auto wchar_t hack_digit (void);
-
-  wchar_t hack_digit (void)
-    {
-      mp_limb_t hi;
-
-      if (expsign != 0 && type == 'f' && exponent-- > 0)
-	hi = 0;
-      else if (scalesize == 0)
-	{
-	  hi = frac[fracsize - 1];
-	  frac[fracsize - 1] = mpn_mul_1 (frac, frac, fracsize - 1, 10);
-	}
-      else
-	{
-	  if (fracsize < scalesize)
-	    hi = 0;
-	  else
-	    {
-	      hi = mpn_divmod (tmp, frac, fracsize, scale, scalesize);
-	      tmp[fracsize - scalesize] = hi;
-	      hi = tmp[0];
-
-	      fracsize = scalesize;
-	      while (fracsize != 0 && frac[fracsize - 1] == 0)
-		--fracsize;
-	      if (fracsize == 0)
-		{
-		  /* We're not prepared for an mpn variable with zero
-		     limbs.  */
-		  fracsize = 1;
-		  return L_('0') + hi;
-		}
-	    }
-
-	  mp_limb_t _cy = mpn_mul_1 (frac, frac, fracsize, 10);
-	  if (_cy != 0)
-	    frac[fracsize++] = _cy;
-	}
-
-      return L_('0') + hi;
-    }
+  p.expsign = 0;
 
   /* Figure out the decimal point character.  */
 #ifdef USE_NL_LANGINFO
@@ -397,11 +399,11 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 	}
       else
 	{
-	  fracsize = mpn_extract_flt128 (fp_input,
-					 (sizeof (fp_input) /
-					  sizeof (fp_input[0])),
-					 &exponent, &is_neg, fpnum);
-	  to_shift = 1 + fracsize * BITS_PER_MP_LIMB - FLT128_MANT_DIG;
+	  p.fracsize = mpn_extract_flt128 (fp_input,
+					   (sizeof (fp_input) /
+					    sizeof (fp_input[0])),
+					   &p.exponent, &is_neg, fpnum);
+	  to_shift = 1 + p.fracsize * BITS_PER_MP_LIMB - FLT128_MANT_DIG;
 	}
     }
 
@@ -437,20 +439,20 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
      efficient to use variables of the fixed maximum size but because this
      would be really big it could lead to memory problems.  */
   {
-    mp_size_t bignum_size = ((ABS (exponent) + BITS_PER_MP_LIMB - 1)
+    mp_size_t bignum_size = ((ABS (p.exponent) + BITS_PER_MP_LIMB - 1)
 			     / BITS_PER_MP_LIMB
 			     + (FLT128_MANT_DIG / BITS_PER_MP_LIMB > 2 ? 8 : 4))
 			    * sizeof (mp_limb_t);
-    frac = (mp_limb_t *) alloca (bignum_size);
-    tmp = (mp_limb_t *) alloca (bignum_size);
-    scale = (mp_limb_t *) alloca (bignum_size);
+    p.frac = (mp_limb_t *) alloca (bignum_size);
+    p.tmp = (mp_limb_t *) alloca (bignum_size);
+    p.scale = (mp_limb_t *) alloca (bignum_size);
   }
 
   /* We now have to distinguish between numbers with positive and negative
      exponents because the method used for the one is not applicable/efficient
      for the other.  */
-  scalesize = 0;
-  if (exponent > 2)
+  p.scalesize = 0;
+  if (p.exponent > 2)
     {
       /* |FP| >= 8.0.  */
       int scaleexpo = 0;
@@ -459,22 +461,22 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
       const struct mp_power *powers = &_fpioconst_pow10[explog + 1];
       int cnt_h, cnt_l, i;
 
-      if ((exponent + to_shift) % BITS_PER_MP_LIMB == 0)
+      if ((p.exponent + to_shift) % BITS_PER_MP_LIMB == 0)
 	{
-	  MPN_COPY_DECR (frac + (exponent + to_shift) / BITS_PER_MP_LIMB,
-			 fp_input, fracsize);
-	  fracsize += (exponent + to_shift) / BITS_PER_MP_LIMB;
+	  MPN_COPY_DECR (p.frac + (p.exponent + to_shift) / BITS_PER_MP_LIMB,
+			 fp_input, p.fracsize);
+	  p.fracsize += (p.exponent + to_shift) / BITS_PER_MP_LIMB;
 	}
       else
 	{
-	  cy = mpn_lshift (frac + (exponent + to_shift) / BITS_PER_MP_LIMB,
-			   fp_input, fracsize,
-			   (exponent + to_shift) % BITS_PER_MP_LIMB);
-	  fracsize += (exponent + to_shift) / BITS_PER_MP_LIMB;
+	  cy = mpn_lshift (p.frac + (p.exponent + to_shift) / BITS_PER_MP_LIMB,
+			   fp_input, p.fracsize,
+			   (p.exponent + to_shift) % BITS_PER_MP_LIMB);
+	  p.fracsize += (p.exponent + to_shift) / BITS_PER_MP_LIMB;
 	  if (cy)
-	    frac[fracsize++] = cy;
+	    p.frac[p.fracsize++] = cy;
 	}
-      MPN_ZERO (frac, (exponent + to_shift) / BITS_PER_MP_LIMB);
+      MPN_ZERO (p.frac, (p.exponent + to_shift) / BITS_PER_MP_LIMB);
 
       assert (powers > &_fpioconst_pow10[0]);
       do
@@ -483,9 +485,9 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 
 	  /* The number of the product of two binary numbers with n and m
 	     bits respectively has m+n or m+n-1 bits.	*/
-	  if (exponent >= scaleexpo + powers->p_expo - 1)
+	  if (p.exponent >= scaleexpo + powers->p_expo - 1)
 	    {
-	      if (scalesize == 0)
+	      if (p.scalesize == 0)
 		{
 		  if (FLT128_MANT_DIG > _FPIO_CONST_OFFSET * BITS_PER_MP_LIMB)
 		    {
@@ -494,60 +496,60 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
    - _FPIO_CONST_OFFSET)
 		      /* 64bit const offset is not enough for
 			 IEEE quad long double.  */
-		      tmpsize = powers->arraysize + _FPIO_CONST_SHIFT;
-		      memcpy (tmp + _FPIO_CONST_SHIFT,
+		      p.tmpsize = powers->arraysize + _FPIO_CONST_SHIFT;
+		      memcpy (p.tmp + _FPIO_CONST_SHIFT,
 			      &__tens[powers->arrayoff],
-			      tmpsize * sizeof (mp_limb_t));
-		      MPN_ZERO (tmp, _FPIO_CONST_SHIFT);
+			      p.tmpsize * sizeof (mp_limb_t));
+		      MPN_ZERO (p.tmp, _FPIO_CONST_SHIFT);
 		      /* Adjust exponent, as scaleexpo will be this much
 			 bigger too.  */
-		      exponent += _FPIO_CONST_SHIFT * BITS_PER_MP_LIMB;
+		      p.exponent += _FPIO_CONST_SHIFT * BITS_PER_MP_LIMB;
 		    }
 		  else
 		    {
-		      tmpsize = powers->arraysize;
-		      memcpy (tmp, &__tens[powers->arrayoff],
-			      tmpsize * sizeof (mp_limb_t));
+		      p.tmpsize = powers->arraysize;
+		      memcpy (p.tmp, &__tens[powers->arrayoff],
+			      p.tmpsize * sizeof (mp_limb_t));
 		    }
 		}
 	      else
 		{
-		  cy = mpn_mul (tmp, scale, scalesize,
+		  cy = mpn_mul (p.tmp, p.scale, p.scalesize,
 				&__tens[powers->arrayoff
 					+ _FPIO_CONST_OFFSET],
 				powers->arraysize - _FPIO_CONST_OFFSET);
-		  tmpsize = scalesize + powers->arraysize - _FPIO_CONST_OFFSET;
+		  p.tmpsize = p.scalesize + powers->arraysize - _FPIO_CONST_OFFSET;
 		  if (cy == 0)
-		    --tmpsize;
+		    --p.tmpsize;
 		}
 
-	      if (MPN_GE (frac, tmp))
+	      if (MPN_GE (p.frac, p.tmp))
 		{
 		  int cnt;
-		  MPN_ASSIGN (scale, tmp);
-		  count_leading_zeros (cnt, scale[scalesize - 1]);
-		  scaleexpo = (scalesize - 2) * BITS_PER_MP_LIMB - cnt - 1;
+		  MPN_ASSIGN (p.scale, p.tmp);
+		  count_leading_zeros (cnt, p.scale[p.scalesize - 1]);
+		  scaleexpo = (p.scalesize - 2) * BITS_PER_MP_LIMB - cnt - 1;
 		  exp10 |= 1 << explog;
 		}
 	    }
 	  --explog;
 	}
       while (powers > &_fpioconst_pow10[0]);
-      exponent = exp10;
+      p.exponent = exp10;
 
       /* Optimize number representations.  We want to represent the numbers
 	 with the lowest number of bytes possible without losing any
 	 bytes. Also the highest bit in the scaling factor has to be set
 	 (this is a requirement of the MPN division routines).  */
-      if (scalesize > 0)
+      if (p.scalesize > 0)
 	{
 	  /* Determine minimum number of zero bits at the end of
 	     both numbers.  */
-	  for (i = 0; scale[i] == 0 && frac[i] == 0; i++)
+	  for (i = 0; p.scale[i] == 0 && p.frac[i] == 0; i++)
 	    ;
 
 	  /* Determine number of bits the scaling factor is misplaced.	*/
-	  count_leading_zeros (cnt_h, scale[scalesize - 1]);
+	  count_leading_zeros (cnt_h, p.scale[p.scalesize - 1]);
 
 	  if (cnt_h == 0)
 	    {
@@ -555,27 +557,27 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 		 we only have to remove the trailing empty limbs.  */
 	      if (i > 0)
 		{
-		  MPN_COPY_INCR (scale, scale + i, scalesize - i);
-		  scalesize -= i;
-		  MPN_COPY_INCR (frac, frac + i, fracsize - i);
-		  fracsize -= i;
+		  MPN_COPY_INCR (p.scale, p.scale + i, p.scalesize - i);
+		  p.scalesize -= i;
+		  MPN_COPY_INCR (p.frac, p.frac + i, p.fracsize - i);
+		  p.fracsize -= i;
 		}
 	    }
 	  else
 	    {
-	      if (scale[i] != 0)
+	      if (p.scale[i] != 0)
 		{
-		  count_trailing_zeros (cnt_l, scale[i]);
-		  if (frac[i] != 0)
+		  count_trailing_zeros (cnt_l, p.scale[i]);
+		  if (p.frac[i] != 0)
 		    {
 		      int cnt_l2;
-		      count_trailing_zeros (cnt_l2, frac[i]);
+		      count_trailing_zeros (cnt_l2, p.frac[i]);
 		      if (cnt_l2 < cnt_l)
 			cnt_l = cnt_l2;
 		    }
 		}
 	      else
-		count_trailing_zeros (cnt_l, frac[i]);
+		count_trailing_zeros (cnt_l, p.frac[i]);
 
 	      /* Now shift the numbers to their optimal position.  */
 	      if (i == 0 && BITS_PER_MP_LIMB - cnt_h > cnt_l)
@@ -583,10 +585,10 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 		  /* We cannot save any memory.	 So just roll both numbers
 		     so that the scaling factor has its highest bit set.  */
 
-		  (void) mpn_lshift (scale, scale, scalesize, cnt_h);
-		  cy = mpn_lshift (frac, frac, fracsize, cnt_h);
+		  (void) mpn_lshift (p.scale, p.scale, p.scalesize, cnt_h);
+		  cy = mpn_lshift (p.frac, p.frac, p.fracsize, cnt_h);
 		  if (cy != 0)
-		    frac[fracsize++] = cy;
+		    p.frac[p.fracsize++] = cy;
 		}
 	      else if (BITS_PER_MP_LIMB - cnt_h <= cnt_l)
 		{
@@ -594,31 +596,31 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 		     and by packing the non-zero limbs which gain another
 		     free one. */
 
-		  (void) mpn_rshift (scale, scale + i, scalesize - i,
+		  (void) mpn_rshift (p.scale, p.scale + i, p.scalesize - i,
 				     BITS_PER_MP_LIMB - cnt_h);
-		  scalesize -= i + 1;
-		  (void) mpn_rshift (frac, frac + i, fracsize - i,
+		  p.scalesize -= i + 1;
+		  (void) mpn_rshift (p.frac, p.frac + i, p.fracsize - i,
 				     BITS_PER_MP_LIMB - cnt_h);
-		  fracsize -= frac[fracsize - i - 1] == 0 ? i + 1 : i;
+		  p.fracsize -= p.frac[p.fracsize - i - 1] == 0 ? i + 1 : i;
 		}
 	      else
 		{
 		  /* We can only save the memory of the limbs which are zero.
 		     The non-zero parts occupy the same number of limbs.  */
 
-		  (void) mpn_rshift (scale, scale + (i - 1),
-				     scalesize - (i - 1),
+		  (void) mpn_rshift (p.scale, p.scale + (i - 1),
+				     p.scalesize - (i - 1),
 				     BITS_PER_MP_LIMB - cnt_h);
-		  scalesize -= i;
-		  (void) mpn_rshift (frac, frac + (i - 1),
-				     fracsize - (i - 1),
+		  p.scalesize -= i;
+		  (void) mpn_rshift (p.frac, p.frac + (i - 1),
+				     p.fracsize - (i - 1),
 				     BITS_PER_MP_LIMB - cnt_h);
-		  fracsize -= frac[fracsize - (i - 1) - 1] == 0 ? i : i - 1;
+		  p.fracsize -= p.frac[p.fracsize - (i - 1) - 1] == 0 ? i : i - 1;
 		}
 	    }
 	}
     }
-  else if (exponent < 0)
+  else if (p.exponent < 0)
     {
       /* |FP| < 1.0.  */
       int exp10 = 0;
@@ -626,40 +628,40 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
       const struct mp_power *powers = &_fpioconst_pow10[explog + 1];
 
       /* Now shift the input value to its right place.	*/
-      cy = mpn_lshift (frac, fp_input, fracsize, to_shift);
-      frac[fracsize++] = cy;
-      assert (cy == 1 || (frac[fracsize - 2] == 0 && frac[0] == 0));
+      cy = mpn_lshift (p.frac, fp_input, p.fracsize, to_shift);
+      p.frac[p.fracsize++] = cy;
+      assert (cy == 1 || (p.frac[p.fracsize - 2] == 0 && p.frac[0] == 0));
 
-      expsign = 1;
-      exponent = -exponent;
+      p.expsign = 1;
+      p.exponent = -p.exponent;
 
       assert (powers != &_fpioconst_pow10[0]);
       do
 	{
 	  --powers;
 
-	  if (exponent >= powers->m_expo)
+	  if (p.exponent >= powers->m_expo)
 	    {
 	      int i, incr, cnt_h, cnt_l;
 	      mp_limb_t topval[2];
 
 	      /* The mpn_mul function expects the first argument to be
 		 bigger than the second.  */
-	      if (fracsize < powers->arraysize - _FPIO_CONST_OFFSET)
-		cy = mpn_mul (tmp, &__tens[powers->arrayoff
+	      if (p.fracsize < powers->arraysize - _FPIO_CONST_OFFSET)
+		cy = mpn_mul (p.tmp, &__tens[powers->arrayoff
 					   + _FPIO_CONST_OFFSET],
 			      powers->arraysize - _FPIO_CONST_OFFSET,
-			      frac, fracsize);
+			      p.frac, p.fracsize);
 	      else
-		cy = mpn_mul (tmp, frac, fracsize,
+		cy = mpn_mul (p.tmp, p.frac, p.fracsize,
 			      &__tens[powers->arrayoff + _FPIO_CONST_OFFSET],
 			      powers->arraysize - _FPIO_CONST_OFFSET);
-	      tmpsize = fracsize + powers->arraysize - _FPIO_CONST_OFFSET;
+	      p.tmpsize = p.fracsize + powers->arraysize - _FPIO_CONST_OFFSET;
 	      if (cy == 0)
-		--tmpsize;
+		--p.tmpsize;
 
-	      count_leading_zeros (cnt_h, tmp[tmpsize - 1]);
-	      incr = (tmpsize - fracsize) * BITS_PER_MP_LIMB
+	      count_leading_zeros (cnt_h, p.tmp[p.tmpsize - 1]);
+	      incr = (p.tmpsize - p.fracsize) * BITS_PER_MP_LIMB
 		     + BITS_PER_MP_LIMB - 1 - cnt_h;
 
 	      assert (incr <= powers->p_expo);
@@ -667,7 +669,7 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 	      /* If we increased the exponent by exactly 3 we have to test
 		 for overflow.	This is done by comparing with 10 shifted
 		 to the right position.	 */
-	      if (incr == exponent + 3)
+	      if (incr == p.exponent + 3)
 		{
 		  if (cnt_h <= BITS_PER_MP_LIMB - 4)
 		    {
@@ -689,32 +691,32 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 		 against 10.0.  If it is greater or equal to 10.0 the
 		 multiplication was not valid.  This is because we cannot
 		 determine the number of bits in the result in advance.  */
-	      if (incr < exponent + 3
-		  || (incr == exponent + 3 &&
-		      (tmp[tmpsize - 1] < topval[1]
-		       || (tmp[tmpsize - 1] == topval[1]
-			   && tmp[tmpsize - 2] < topval[0]))))
+	      if (incr < p.exponent + 3
+		  || (incr == p.exponent + 3 &&
+		      (p.tmp[p.tmpsize - 1] < topval[1]
+		       || (p.tmp[p.tmpsize - 1] == topval[1]
+			   && p.tmp[p.tmpsize - 2] < topval[0]))))
 		{
 		  /* The factor is right.  Adapt binary and decimal
 		     exponents.	 */
-		  exponent -= incr;
+		  p.exponent -= incr;
 		  exp10 |= 1 << explog;
 
 		  /* If this factor yields a number greater or equal to
 		     1.0, we must not shift the non-fractional digits down. */
-		  if (exponent < 0)
-		    cnt_h += -exponent;
+		  if (p.exponent < 0)
+		    cnt_h += -p.exponent;
 
 		  /* Now we optimize the number representation.	 */
-		  for (i = 0; tmp[i] == 0; ++i);
+		  for (i = 0; p.tmp[i] == 0; ++i);
 		  if (cnt_h == BITS_PER_MP_LIMB - 1)
 		    {
-		      MPN_COPY (frac, tmp + i, tmpsize - i);
-		      fracsize = tmpsize - i;
+		      MPN_COPY (p.frac, p.tmp + i, p.tmpsize - i);
+		      p.fracsize = p.tmpsize - i;
 		    }
 		  else
 		    {
-		      count_trailing_zeros (cnt_l, tmp[i]);
+		      count_trailing_zeros (cnt_l, p.tmp[i]);
 
 		      /* Now shift the numbers to their optimal position.  */
 		      if (i == 0 && BITS_PER_MP_LIMB - 1 - cnt_h > cnt_l)
@@ -723,15 +725,15 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 			     number so that the leading digit is in a
 			     separate limb.  */
 
-			  cy = mpn_lshift (frac, tmp, tmpsize, cnt_h + 1);
-			  fracsize = tmpsize + 1;
-			  frac[fracsize - 1] = cy;
+			  cy = mpn_lshift (p.frac, p.tmp, p.tmpsize, cnt_h + 1);
+			  p.fracsize = p.tmpsize + 1;
+			  p.frac[p.fracsize - 1] = cy;
 			}
 		      else if (BITS_PER_MP_LIMB - 1 - cnt_h <= cnt_l)
 			{
-			  (void) mpn_rshift (frac, tmp + i, tmpsize - i,
+			  (void) mpn_rshift (p.frac, p.tmp + i, p.tmpsize - i,
 					     BITS_PER_MP_LIMB - 1 - cnt_h);
-			  fracsize = tmpsize - i;
+			  p.fracsize = p.tmpsize - i;
 			}
 		      else
 			{
@@ -739,41 +741,41 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 			     are zero.	The non-zero parts occupy the same
 			     number of limbs.  */
 
-			  (void) mpn_rshift (frac, tmp + (i - 1),
-					     tmpsize - (i - 1),
+			  (void) mpn_rshift (p.frac, p.tmp + (i - 1),
+					     p.tmpsize - (i - 1),
 					     BITS_PER_MP_LIMB - 1 - cnt_h);
-			  fracsize = tmpsize - (i - 1);
+			  p.fracsize = p.tmpsize - (i - 1);
 			}
 		    }
 		}
 	    }
 	  --explog;
 	}
-      while (powers != &_fpioconst_pow10[1] && exponent > 0);
+      while (powers != &_fpioconst_pow10[1] && p.exponent > 0);
       /* All factors but 10^-1 are tested now.	*/
-      if (exponent > 0)
+      if (p.exponent > 0)
 	{
 	  int cnt_l;
 
-	  cy = mpn_mul_1 (tmp, frac, fracsize, 10);
-	  tmpsize = fracsize;
-	  assert (cy == 0 || tmp[tmpsize - 1] < 20);
+	  cy = mpn_mul_1 (p.tmp, p.frac, p.fracsize, 10);
+	  p.tmpsize = p.fracsize;
+	  assert (cy == 0 || p.tmp[p.tmpsize - 1] < 20);
 
-	  count_trailing_zeros (cnt_l, tmp[0]);
-	  if (cnt_l < MIN (4, exponent))
+	  count_trailing_zeros (cnt_l, p.tmp[0]);
+	  if (cnt_l < MIN (4, p.exponent))
 	    {
-	      cy = mpn_lshift (frac, tmp, tmpsize,
-			       BITS_PER_MP_LIMB - MIN (4, exponent));
+	      cy = mpn_lshift (p.frac, p.tmp, p.tmpsize,
+			       BITS_PER_MP_LIMB - MIN (4, p.exponent));
 	      if (cy != 0)
-		frac[tmpsize++] = cy;
+		p.frac[p.tmpsize++] = cy;
 	    }
 	  else
-	    (void) mpn_rshift (frac, tmp, tmpsize, MIN (4, exponent));
-	  fracsize = tmpsize;
+	    (void) mpn_rshift (p.frac, p.tmp, p.tmpsize, MIN (4, p.exponent));
+	  p.fracsize = p.tmpsize;
 	  exp10 |= 1;
-	  assert (frac[fracsize - 1] < 10);
+	  assert (p.frac[p.fracsize - 1] < 10);
 	}
-      exponent = exp10;
+      p.exponent = exp10;
     }
   else
     {
@@ -781,13 +783,13 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 	 numbers are in the range of 1.0 <= |fp| < 8.0.  We simply
 	 shift it to the right place and divide it by 1.0 to get the
 	 leading digit.	 (Of course this division is not really made.)	*/
-      assert (0 <= exponent && exponent < 3 &&
-	      exponent + to_shift < BITS_PER_MP_LIMB);
+      assert (0 <= p.exponent && p.exponent < 3 &&
+	      p.exponent + to_shift < BITS_PER_MP_LIMB);
 
       /* Now shift the input value to its right place.	*/
-      cy = mpn_lshift (frac, fp_input, fracsize, (exponent + to_shift));
-      frac[fracsize++] = cy;
-      exponent = 0;
+      cy = mpn_lshift (p.frac, fp_input, p.fracsize, (p.exponent + to_shift));
+      p.frac[p.fracsize++] = cy;
+      p.exponent = 0;
     }
 
   {
@@ -805,7 +807,7 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 
     if (spec == 'e')
       {
-	type = info->spec;
+	p.type = info->spec;
 	intdig_max = 1;
 	fracdig_min = fracdig_max = info->prec < 0 ? 6 : info->prec;
 	chars_needed = 1 + 1 + (size_t) fracdig_max + 1 + 1 + 4;
@@ -815,15 +817,15 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
       }
     else if (spec == 'f')
       {
-	type = 'f';
+	p.type = 'f';
 	fracdig_min = fracdig_max = info->prec < 0 ? 6 : info->prec;
 	dig_max = __INT_MAX__;		/* Unlimited.  */
 	significant = 1;		/* Does not matter here.  */
-	if (expsign == 0)
+	if (p.expsign == 0)
 	  {
-	    intdig_max = exponent + 1;
+	    intdig_max = p.exponent + 1;
 	    /* This can be really big!	*/  /* XXX Maybe malloc if too big? */
-	    chars_needed = (size_t) exponent + 1 + 1 + (size_t) fracdig_max;
+	    chars_needed = (size_t) p.exponent + 1 + 1 + (size_t) fracdig_max;
 	  }
 	else
 	  {
@@ -834,21 +836,21 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
     else
       {
 	dig_max = info->prec < 0 ? 6 : (info->prec == 0 ? 1 : info->prec);
-	if ((expsign == 0 && exponent >= dig_max)
-	    || (expsign != 0 && exponent > 4))
+	if ((p.expsign == 0 && p.exponent >= dig_max)
+	    || (p.expsign != 0 && p.exponent > 4))
 	  {
 	    if ('g' - 'G' == 'e' - 'E')
-	      type = 'E' + (info->spec - 'G');
+	      p.type = 'E' + (info->spec - 'G');
 	    else
-	      type = isupper (info->spec) ? 'E' : 'e';
+	      p.type = isupper (info->spec) ? 'E' : 'e';
 	    fracdig_max = dig_max - 1;
 	    intdig_max = 1;
 	    chars_needed = 1 + 1 + (size_t) fracdig_max + 1 + 1 + 4;
 	  }
 	else
 	  {
-	    type = 'f';
-	    intdig_max = expsign == 0 ? exponent + 1 : 0;
+	    p.type = 'f';
+	    intdig_max = p.expsign == 0 ? p.exponent + 1 : 0;
 	    fracdig_max = dig_max - intdig_max;
 	    /* We need space for the significant digits and perhaps
 	       for leading zeros when < 1.0.  The number of leading
@@ -898,18 +900,18 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
     wcp = wstartp = wbuffer + 2;	/* Let room for rounding.  */
 
     /* Do the real work: put digits in allocated buffer.  */
-    if (expsign == 0 || type != 'f')
+    if (p.expsign == 0 || p.type != 'f')
       {
-	assert (expsign == 0 || intdig_max == 1);
+	assert (p.expsign == 0 || intdig_max == 1);
 	while (intdig_no < intdig_max)
 	  {
 	    ++intdig_no;
-	    *wcp++ = hack_digit ();
+	    *wcp++ = hack_digit (&p);
 	  }
 	significant = 1;
 	if (info->alt
 	    || fracdig_min > 0
-	    || (fracdig_max > 0 && (fracsize > 1 || frac[0] != 0)))
+	    || (fracdig_max > 0 && (p.fracsize > 1 || p.frac[0] != 0)))
 	  *wcp++ = decimalwc;
       }
     else
@@ -917,7 +919,7 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 	/* |fp| < 1.0 and the selected type is 'f', so put "0."
 	   in the buffer.  */
 	*wcp++ = L_('0');
-	--exponent;
+	--p.exponent;
 	*wcp++ = decimalwc;
       }
 
@@ -925,10 +927,10 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
     int fracdig_no = 0;
     int added_zeros = 0;
     while (fracdig_no < fracdig_min + added_zeros
-	   || (fracdig_no < fracdig_max && (fracsize > 1 || frac[0] != 0)))
+	   || (fracdig_no < fracdig_max && (p.fracsize > 1 || p.frac[0] != 0)))
       {
 	++fracdig_no;
-	*wcp = hack_digit ();
+	*wcp = hack_digit (&p);
 	if (*wcp++ != L_('0'))
 	  significant = 1;
 	else if (significant == 0)
@@ -941,19 +943,19 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 
     /* Do rounding.  */
     last_digit = wcp[-1] != decimalwc ? wcp[-1] : wcp[-2];
-    next_digit =hack_digit ();
+    next_digit =hack_digit (&p);
 
     if (next_digit != L_('0') && next_digit != L_('5'))
       more_bits = true;
-    else if (fracsize == 1 && frac[0] == 0)
+    else if (p.fracsize == 1 && p.frac[0] == 0)
       /* Rest of the number is zero.  */
       more_bits = false;
-    else if (scalesize == 0)
+    else if (p.scalesize == 0)
       {
 	/* Here we have to see whether all limbs are zero since no
 	   normalization happened.  */
-	size_t lcnt = fracsize;
-	while (lcnt >= 1 && frac[lcnt - 1] == 0)
+	size_t lcnt = p.fracsize;
+	while (lcnt >= 1 && p.frac[lcnt - 1] == 0)
 	  --lcnt;
 	more_bits = lcnt > 0;
       }
@@ -982,7 +984,7 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 	    if (*wtp != decimalwc)
 	      /* Round up.  */
 	      (*wtp)++;
-	    else if (__builtin_expect (spec == 'g' && type == 'f' && info->alt
+	    else if (__builtin_expect (spec == 'g' && p.type == 'f' && info->alt
 				       && wtp == wstartp + 1
 				       && wstartp[0] == L_('0'),
 				       0))
@@ -1007,16 +1009,16 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 	    else
 	      /* It is more critical.  All digits were 9's.  */
 	      {
-		if (type != 'f')
+		if (p.type != 'f')
 		  {
 		    *wstartp = '1';
-		    exponent += expsign == 0 ? 1 : -1;
+		    p.exponent += p.expsign == 0 ? 1 : -1;
 
 		    /* The above exponent adjustment could lead to 1.0e-00,
 		       e.g. for 0.999999999.  Make sure exponent 0 always
 		       uses + sign.  */
-		    if (exponent == 0)
-		      expsign = 0;
+		    if (p.exponent == 0)
+		      p.expsign = 0;
 		  }
 		else if (intdig_no == dig_max)
 		  {
@@ -1036,9 +1038,9 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 		    fracdig_no += intdig_no;
 		    intdig_no = 1;
 		    fracdig_max = intdig_max - intdig_no;
-		    ++exponent;
+		    ++p.exponent;
 		    /* Now we must print the exponent.	*/
-		    type = isupper (info->spec) ? 'E' : 'e';
+		    p.type = isupper (info->spec) ? 'E' : 'e';
 		  }
 		else
 		  {
@@ -1085,9 +1087,9 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
       }
 
     /* Write the exponent if it is needed.  */
-    if (type != 'f')
+    if (p.type != 'f')
       {
-	if (__builtin_expect (expsign != 0 && exponent == 4 && spec == 'g', 0))
+	if (__builtin_expect (p.expsign != 0 && p.exponent == 4 && spec == 'g', 0))
 	  {
 	    /* This is another special case.  The exponent of the number is
 	       really smaller than -4, which requires the 'e'/'E' format.
@@ -1108,26 +1110,26 @@ __quadmath_printf_fp (struct __quadmath_printf_file *fp,
 	  }
 	else
 	  {
-	    *wcp++ = (wchar_t) type;
-	    *wcp++ = expsign ? L_('-') : L_('+');
+	    *wcp++ = (wchar_t) p.type;
+	    *wcp++ = p.expsign ? L_('-') : L_('+');
 
 	    /* Find the magnitude of the exponent.	*/
 	    expscale = 10;
-	    while (expscale <= exponent)
+	    while (expscale <= p.exponent)
 	      expscale *= 10;
 
-	    if (exponent < 10)
+	    if (p.exponent < 10)
 	      /* Exponent always has at least two digits.  */
 	      *wcp++ = L_('0');
 	    else
 	      do
 		{
 		  expscale /= 10;
-		  *wcp++ = L_('0') + (exponent / expscale);
-		  exponent %= expscale;
+		  *wcp++ = L_('0') + (p.exponent / expscale);
+		  p.exponent %= expscale;
 		}
 	      while (expscale > 10);
-	    *wcp++ = L_('0') + exponent;
+	    *wcp++ = L_('0') + p.exponent;
 	  }
       }
 

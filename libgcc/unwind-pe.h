@@ -71,6 +71,11 @@ size_of_encoded_value (unsigned char encoding) __attribute__ ((unused));
 static unsigned int
 size_of_encoded_value (unsigned char encoding)
 {
+#if defined (__e2k__) && defined (__ptr128__)
+  if (encoding == DW_EH_PE_aligned)
+    return 16;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+
   if (encoding == DW_EH_PE_omit)
     return 0;
 
@@ -179,11 +184,19 @@ read_sleb128 (const unsigned char *p, _sleb128_t *val)
 
 static const unsigned char *
 read_encoded_value_with_base (unsigned char encoding, _Unwind_Ptr base,
-			      const unsigned char *p, _Unwind_Ptr *val)
+			      const unsigned char *p, _Unwind_Ptr *val
+#if defined (__e2k__) && defined (__ptr128__)
+			      , void **pval
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+			      )
 {
   union unaligned
     {
+#if ! (defined (__e2k__) && defined (__ptr128__))
       void *ptr;
+#else /* (defined (__e2k__) && defined (__ptr128__)  */
+      _Unwind_Ptr ptr;
+#endif /* (defined (__e2k__) && defined (__ptr128__)  */
       unsigned u2 __attribute__ ((mode (HI)));
       unsigned u4 __attribute__ ((mode (SI)));
       unsigned u8 __attribute__ ((mode (DI)));
@@ -199,8 +212,17 @@ read_encoded_value_with_base (unsigned char encoding, _Unwind_Ptr base,
     {
       _Unwind_Internal_Ptr a = (_Unwind_Internal_Ptr) p;
       a = (a + sizeof (void *) - 1) & - sizeof(void *);
+#if ! (defined (__e2k__) && defined (__ptr128__))
       result = *(_Unwind_Internal_Ptr *) a;
       p = (const unsigned char *) (_Unwind_Internal_Ptr) (a + sizeof (void *));
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+      /* Do without conversion of an integer into a pointer when calculating an
+	 aligned pointer in PM.  */
+      p += a - (_Unwind_Internal_Ptr) p;
+      result = *(_Unwind_Internal_Ptr *) (void *) p;
+      *pval = *(void **) (void *) p;
+      p += sizeof (void *);
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
     }
   else
     {
@@ -208,7 +230,11 @@ read_encoded_value_with_base (unsigned char encoding, _Unwind_Ptr base,
 	{
 	case DW_EH_PE_absptr:
 	  result = (_Unwind_Internal_Ptr) u->ptr;
+#if ! (defined (__e2k__) && defined (__ptr128__))
 	  p += sizeof (void *);
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+	  p += sizeof (_Unwind_Ptr);
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 	  break;
 
 	case DW_EH_PE_uleb128:
@@ -261,14 +287,55 @@ read_encoded_value_with_base (unsigned char encoding, _Unwind_Ptr base,
 	{
 	  result += ((encoding & 0x70) == DW_EH_PE_pcrel
 		     ? (_Unwind_Internal_Ptr) u : base);
+#if defined (__e2k__) && defined (__ptr128__)
+	  /* In Protected Mode U belongs to the data segment, while PC,
+	     being evaluated by means of DW_EH_PE_pcrel, to the text one.
+	     BASE takes into account the difference between the bases of
+	     these segments.  */
+	  if ((encoding & 0x70) == DW_EH_PE_pcrel)
+	    result += base;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 	  if (encoding & DW_EH_PE_indirect)
 	    result = *(_Unwind_Internal_Ptr *) result;
 	}
     }
 
+#if defined (__e2k__) && defined (__ptr128__)
+  /* In PM VAL is of an inappropriate type for returning a pointer, which
+     is why the user may pass NULL for it.  */
+  if (val)
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
   *val = result;
   return p;
 }
+
+#if defined (__e2k__) && defined (__ptr128__)
+
+static const unsigned char *
+read_encoded_ptr_with_base (unsigned char encoding, _Unwind_Ptr base,
+			    const unsigned char *p, void **pval)
+{
+    return read_encoded_value_with_base (encoding,
+		base, p, NULL, pval);
+}
+
+
+# ifndef NO_BASE_OF_ENCODED_VALUE
+static inline const unsigned char *
+read_encoded_ptr (struct _Unwind_Context *context, unsigned char encoding,
+		  const unsigned char *p, void **pval)
+{
+  return read_encoded_ptr_with_base (encoding,
+		base_of_encoded_value (encoding, context),
+		p, pval);
+}
+# endif /* ! defined NO_BASE_OF_ENCODED_VALUE  */
+
+# define read_encoded_value_with_base(a, b, c, d) \
+  read_encoded_value_with_base (a, b, c, d, NULL)
+
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+
 
 #ifndef NO_BASE_OF_ENCODED_VALUE
 
