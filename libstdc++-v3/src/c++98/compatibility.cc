@@ -25,9 +25,14 @@
 #define _GLIBCXX_USE_CXX11_ABI 0
 #include <bits/c++config.h>
 
+// The underlying defines are used to create versioned aliases for the sake of
+// runtime compatibility with older GCC versions. This can't currently be done
+// with LCC in use because of its inability to accept a mangled C++ symbol name
+// as the argument of `__attribute__ ((alias ("...")))' (Bug #108709).
 #if defined(_GLIBCXX_SYMVER_GNU) && defined(_GLIBCXX_SHARED) \
     && defined(_GLIBCXX_HAVE_AS_SYMVER_DIRECTIVE)\
-    && defined(_GLIBCXX_HAVE_SYMVER_SYMBOL_RENAMING_RUNTIME_SUPPORT)
+    && defined(_GLIBCXX_HAVE_SYMVER_SYMBOL_RENAMING_RUNTIME_SUPPORT) \
+    && !defined(__LCC__)
 #define istreambuf_iterator istreambuf_iteratorXX
 #define basic_fstream basic_fstreamXX
 #define basic_ifstream basic_ifstreamXX
@@ -204,9 +209,13 @@ _GLIBCXX_END_NAMESPACE_VERSION
 
 // NB: These symbols renames should go into the shared library only,
 // and only those shared libraries that support versioning.
+
+// Avoid creating versioned aliases for the sake of runtime compatibility with
+// older GCC versions when being compiled with LCC (Bug #108709).
 #if defined(_GLIBCXX_SYMVER_GNU) && defined(_GLIBCXX_SHARED) \
     && defined(_GLIBCXX_HAVE_AS_SYMVER_DIRECTIVE) \
-    && defined(_GLIBCXX_HAVE_SYMVER_SYMBOL_RENAMING_RUNTIME_SUPPORT)
+    && defined(_GLIBCXX_HAVE_SYMVER_SYMBOL_RENAMING_RUNTIME_SUPPORT) \
+    && !defined(__LCC__)
 
 /* gcc-3.4.4
 _ZNSt19istreambuf_iteratorIcSt11char_traitsIcEEppEv

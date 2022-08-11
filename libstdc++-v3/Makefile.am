@@ -24,7 +24,7 @@ include $(top_srcdir)/fragment.am
 
 if GLIBCXX_HOSTED
 ## Note that python must come after src.
-  hosted_source = src doc po testsuite python
+  hosted_source = src
 endif
 
 ## Keep this list sync'd with acinclude.m4:GLIBCXX_CONFIGURE.

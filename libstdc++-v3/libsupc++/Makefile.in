@@ -131,7 +131,7 @@ am__objects_1 = array_type_info.lo atexit_arm.lo atexit_thread.lo \
 	del_opvsa.lo pbase_type_info.lo pmem_type_info.lo \
 	pointer_type_info.lo pure.lo si_class_type_info.lo tinfo.lo \
 	tinfo2.lo vec.lo vmi_class_type_info.lo vterminate.lo
-@GLIBCXX_HOSTED_TRUE@am__objects_2 = cp-demangle.lo
+@GLIBCXX_HOSTED_TRUE@am__objects_2 = decode.lo
 @ENABLE_VTABLE_VERIFY_TRUE@@VTV_CYGMIN_FALSE@am__objects_3 =  \
 @ENABLE_VTABLE_VERIFY_TRUE@@VTV_CYGMIN_FALSE@	vtv_stubs.lo
 am_libsupc___la_OBJECTS = $(am__objects_1) $(am__objects_2) \
@@ -404,7 +404,7 @@ bits_HEADERS = \
 
 headers = $(std_HEADERS) $(bits_HEADERS)
 @GLIBCXX_HOSTED_TRUE@c_sources = \
-@GLIBCXX_HOSTED_TRUE@	cp-demangle.c
+@GLIBCXX_HOSTED_TRUE@	cxa/decode.c
 
 sources = \
 	array_type_info.cc \
@@ -476,6 +476,13 @@ sources = \
 
 libsupc___la_SOURCES = $(sources) $(c_sources) $(vtv_sources)
 libsupc__convenience_la_SOURCES = $(sources) $(c_sources) $(vtv_sources)
+CXA_INCLUDES = -I$(srcdir)/cxa
+CXA_CFLAGS = -fbuilding-runtime -std=c++17 -fno-strict-aliasing -Wno-error
+CXA_DECODE_CFLAGS = \
+	-DCOMPILE_DECODE_FOR_LIB_SRC=1 \
+	-DDEFAULT_EMULATE_GNU_ABI_BUGS=1 \
+	-DUSE_LONG_DOUBLE_FOR_HOST_FP_VALUE=1
+
 
 # AM_CXXFLAGS needs to be in each subdirectory so that it can be
 # modified in a per-library or per-sub-library way.  Need to manually
@@ -852,13 +859,15 @@ uninstall-am: uninstall-bitsHEADERS uninstall-stdHEADERS \
 	uninstall-toolexeclibLTLIBRARIES
 
 
-cp-demangle.c:
-	rm -f $@
-	$(LN_S) $(toplevel_srcdir)/libiberty/cp-demangle.c $@
-cp-demangle.lo: cp-demangle.c
-	$(LTCOMPILE) -DIN_GLIBCPP_V3 -Wno-error -c $<
-cp-demangle.o: cp-demangle.c
-	$(C_COMPILE) -DIN_GLIBCPP_V3 -Wno-error -c $<
+decode.lo: cxa/decode.c
+	$(LTCXXCOMPILE) $(CXA_INCLUDES) $(CXA_CFLAGS) $(CXA_DECODE_CFLAGS) -c -xc++ $<
+decode.o: cxa/decode.c
+	$(CXXCOMPILE) $(CXA_INCLUDES) $(CXA_CFLAGS) $(CXA_DECODE_CFLAGS) -c -xc++ $<
+
+fundamental_type_info.lo: fundamental_type_info.cc
+	$(LTCXXCOMPILE) -fbuilding-runtime -std=gnu++14 -c $<
+fundamental_type_info.o: fundamental_type_info.cc
+	$(CXXCOMPILE) -fbuilding-runtime -std=gnu++14 -c $<
 
 # Use special rules for the C++11 sources so that the proper flags are passed.
 bad_array_length.lo: bad_array_length.cc

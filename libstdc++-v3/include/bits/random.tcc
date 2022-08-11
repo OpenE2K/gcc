@@ -1627,7 +1627,11 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 			     + __x * __param._M_lp1p;
 		  }
 
+#ifdef __LCC__ // libstdc++/71434
+		__reject = __reject || __x + __np >= __thr;
+#else // __LCC__
 		__reject |= __x + __np >= __thr;
+#endif // __LCC__
 	      }
 	    while (__reject);
 

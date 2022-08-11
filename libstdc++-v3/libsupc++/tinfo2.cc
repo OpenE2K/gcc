@@ -36,8 +36,12 @@ type_info::before (const type_info &arg) const _GLIBCXX_NOEXCEPT
 #if __GXX_MERGED_TYPEINFO_NAMES
   return name () < arg.name ();
 #else
+#ifdef __LCC__
+  return __builtin_strcmp (name (), arg.name ()) < 0;
+#else // __LCC__
   return (name ()[0] == '*') ? name () < arg.name ()
     :  __builtin_strcmp (name (), arg.name ()) < 0;
+#endif // __LCC__
 #endif
 }
 

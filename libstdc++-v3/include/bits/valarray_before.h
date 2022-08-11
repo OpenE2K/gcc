@@ -60,98 +60,154 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
   //    2) efficiency -- object functions can be easily inlined
   //    3) be Koenig-lookup-friendly
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Abs_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Abs
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return abs(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Cos_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Cos
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return cos(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Acos_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Acos
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return acos(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Cosh_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Cosh
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return cosh(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Sin_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Sin
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return sin(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Asin_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Asin
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return asin(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Sinh_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Sinh
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return sinh(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Tan_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Tan
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return tan(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Atan_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Atan
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return atan(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Tanh_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Tanh
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return tanh(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Exp_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Exp
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return exp(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Log_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Log
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return log(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Log10_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Log10
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const
       { return log10(__t); }
   };
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+  struct _Sqrt_
+#else // defined(__LCC__) && defined(__QNXNTO__)
   struct _Sqrt
+#endif // defined(__LCC__) && defined(__QNXNTO__)
   {
     template<typename _Tp>
       _Tp operator()(const _Tp& __t) const

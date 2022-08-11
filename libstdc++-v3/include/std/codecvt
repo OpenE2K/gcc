@@ -58,10 +58,17 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     class codecvt_utf8 : public codecvt<_Elem, char, mbstate_t>
     {
     public:
+#ifdef __LCC__
+      explicit
+      codecvt_utf8(size_t __refs = 0) { __builtin_abort(); } // mcstbug #122111
+
+      ~codecvt_utf8() { __builtin_abort(); } // mcstbug #122111
+#else /* __LCC__ */
       explicit
       codecvt_utf8(size_t __refs = 0);
 
       ~codecvt_utf8();
+#endif /* __LCC__ */
     };
 
   template<typename _Elem, unsigned long _Maxcode = 0x10ffff,

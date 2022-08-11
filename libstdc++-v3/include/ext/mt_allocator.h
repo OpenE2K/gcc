@@ -59,9 +59,17 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     struct _Tune
      {
       // Compile time constants for the default _Tune values.
+#if ! (defined (__e2k__) && defined (__ptr128__))
       enum { _S_align = 8 };
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+      enum { _S_align = 16 };
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
       enum { _S_max_bytes = 128 };
+#if ! (defined (__e2k__) && defined (__ptr128__))
       enum { _S_min_bin = 8 };
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+      enum { _S_min_bin = 16 };
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
       enum { _S_chunk_size = 4096 - 4 * sizeof(void*) };
       enum { _S_max_threads = 4096 };
       enum { _S_freelist_headroom = 10 };

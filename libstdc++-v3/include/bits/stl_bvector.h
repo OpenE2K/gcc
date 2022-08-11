@@ -489,7 +489,18 @@ _GLIBCXX_BEGIN_NAMESPACE_CONTAINER
 
       _Bit_pointer
       _M_allocate(size_t __n)
+#if ! (defined (__e2k__) && defined (__ptr128__))
       { return _Bit_alloc_traits::allocate(_M_impl, _S_nword(__n)); }
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+      {
+	/* To zero-out certain bits in the allocated _Bit_pointer they may very
+	   well apply logical AND to its uninitalized value. Therefore, take
+	   care of initializing it in PM.  */
+	_Bit_pointer res = _Bit_alloc_traits::allocate(_M_impl, _S_nword(__n));
+	std::fill(res, res + _S_nword(__n), 0);
+	return res;
+      }
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 
       void
       _M_deallocate()

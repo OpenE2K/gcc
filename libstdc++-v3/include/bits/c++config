@@ -257,7 +257,11 @@ namespace __gnu_cxx
   inline namespace __cxx11 __attribute__((__abi_tag__ ("cxx11"))) { }
 }
 # define _GLIBCXX_NAMESPACE_CXX11 __cxx11::
+#ifdef __LCC__ // suppress warning
+# define _GLIBCXX_BEGIN_NAMESPACE_CXX11 inline namespace __cxx11 {
+#else // __LCC__
 # define _GLIBCXX_BEGIN_NAMESPACE_CXX11 namespace __cxx11 {
+#endif // __LCC__
 # define _GLIBCXX_END_NAMESPACE_CXX11 }
 # define _GLIBCXX_DEFAULT_ABI_TAG _GLIBCXX_ABI_TAG_CXX11
 #else

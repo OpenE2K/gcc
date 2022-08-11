@@ -97,7 +97,11 @@ namespace std
     /** Returns an @e implementation-defined byte string; this is not
      *  portable between compilers!  */
     const char* name() const _GLIBCXX_NOEXCEPT
+#ifdef __LCC__
+    { return __name; }
+#else // __LCC__
     { return __name[0] == '*' ? __name + 1 : __name; }
+#endif // __LCC__
 
 #if !__GXX_TYPEINFO_EQUALITY_INLINE
     // In old abi, or when weak symbols are not supported, there can
@@ -112,6 +116,16 @@ namespace std
     // Even with the new abi, on systems that support dlopen
     // we can run into cases where type_info names aren't merged,
     // so we still need to do string comparison.
+#ifdef __LCC__
+    bool before(const type_info& __arg) const _GLIBCXX_NOEXCEPT
+    { return __builtin_strcmp (__name, __arg.__name) < 0; }
+
+    bool operator==(const type_info& __arg) const _GLIBCXX_NOEXCEPT
+    {
+      return ((&__arg == this)
+              || __builtin_strcmp (__name, __arg.__name) == 0);
+    }
+#else // __LCC__
     bool before(const type_info& __arg) const _GLIBCXX_NOEXCEPT
     { return (__name[0] == '*' && __arg.__name[0] == '*')
 	? __name < __arg.__name
@@ -123,6 +137,7 @@ namespace std
 	      || (__name[0] != '*' &&
 		  __builtin_strcmp (__name, __arg.__name) == 0));
     }
+#endif // __LCC__
   #else
     // On some targets we can rely on type_info's NTBS being unique,
     // and therefore address comparisons are sufficient.

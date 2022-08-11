@@ -439,6 +439,22 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
       return _Expr<_Closure, _Tp>(_Closure(__v));                        \
     }
 
+#if defined(__LCC__) && defined(__QNXNTO__) // libstdc++ names conflict with QNX-libc names
+    _DEFINE_EXPR_UNARY_FUNCTION(abs, _Abs_)
+    _DEFINE_EXPR_UNARY_FUNCTION(cos, _Cos_)
+    _DEFINE_EXPR_UNARY_FUNCTION(acos, _Acos_)
+    _DEFINE_EXPR_UNARY_FUNCTION(cosh, _Cosh_)
+    _DEFINE_EXPR_UNARY_FUNCTION(sin, _Sin_)
+    _DEFINE_EXPR_UNARY_FUNCTION(asin, _Asin_)
+    _DEFINE_EXPR_UNARY_FUNCTION(sinh, _Sinh_)
+    _DEFINE_EXPR_UNARY_FUNCTION(tan, _Tan_)
+    _DEFINE_EXPR_UNARY_FUNCTION(tanh, _Tanh_)
+    _DEFINE_EXPR_UNARY_FUNCTION(atan, _Atan_)
+    _DEFINE_EXPR_UNARY_FUNCTION(exp, _Exp_)
+    _DEFINE_EXPR_UNARY_FUNCTION(log, _Log_)
+    _DEFINE_EXPR_UNARY_FUNCTION(log10, _Log10_)
+    _DEFINE_EXPR_UNARY_FUNCTION(sqrt, _Sqrt_)
+#else // defined(__LCC__) && defined(__QNXNTO__)
     _DEFINE_EXPR_UNARY_FUNCTION(abs, _Abs)
     _DEFINE_EXPR_UNARY_FUNCTION(cos, _Cos)
     _DEFINE_EXPR_UNARY_FUNCTION(acos, _Acos)
@@ -453,6 +469,7 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     _DEFINE_EXPR_UNARY_FUNCTION(log, _Log)
     _DEFINE_EXPR_UNARY_FUNCTION(log10, _Log10)
     _DEFINE_EXPR_UNARY_FUNCTION(sqrt, _Sqrt)
+#endif // defined(__LCC__) && defined(__QNXNTO__)
 
 #undef _DEFINE_EXPR_UNARY_FUNCTION
 

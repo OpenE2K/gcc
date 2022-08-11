@@ -74,8 +74,11 @@ aligned_alloc (std::size_t al, std::size_t sz)
   if (!malloc_ptr)
     return nullptr;
   // Align to the requested value, leaving room for the original malloc value.
+#if defined(__LCC__) && defined(__ptr128__)
+  void* const aligned_ptr = malloc_ptr + (-(uintptr_t) malloc_ptr & (al - 1));
+#else
   void* const aligned_ptr = (void *) (((uintptr_t) malloc_ptr + al) & -al);
-
+#endif
   // Store the original malloc value where it can be found by operator delete.
   ((void **) aligned_ptr)[-1] = malloc_ptr;
 

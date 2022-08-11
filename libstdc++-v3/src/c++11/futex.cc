@@ -27,8 +27,12 @@
 #if defined(_GLIBCXX_HAVE_LINUX_FUTEX) && ATOMIC_INT_LOCK_FREE > 1
 #include <chrono>
 #include <climits>
-#include <syscall.h>
-#include <unistd.h>
+#if ! (defined (__e2k__) && defined (__ptr128__))
+# include <syscall.h>
+# include <unistd.h>
+#else /* (defined (__e2k__) && defined (__ptr128__))  */
+# include <e2k128/futex.h>
+#endif /* (defined (__e2k__) && defined (__ptr128__))  */
 #include <sys/time.h>
 #include <errno.h>
 #include <debug/debug.h>
@@ -52,7 +56,13 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	// we will fall back to spin-waiting.  The only thing we could do
 	// here on errors is abort.
 	int ret __attribute__((unused));
-	ret = syscall (SYS_futex, __addr, futex_wait_op, __val, nullptr);
+	ret =
+#  if !(defined (__e2k__) && defined (__ptr128__))
+	  syscall (SYS_futex,
+#  else /* (defined (__e2k__) && defined (__ptr128__))  */
+	  futex   (
+#  endif  /* (defined (__e2k__) && defined (__ptr128__))  */
+		   __addr, futex_wait_op, __val, nullptr);
 	_GLIBCXX_DEBUG_ASSERT(ret == 0 || errno == EINTR || errno == EAGAIN);
 	return true;
       }
@@ -73,7 +83,13 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	if (rt.tv_sec < 0)
 	  return false;
 
-	if (syscall (SYS_futex, __addr, futex_wait_op, __val, &rt) == -1)
+	if (
+#  if !(defined (__e2k__) && defined (__ptr128__))
+	    syscall (SYS_futex,
+#  else /* (defined (__e2k__) && defined (__ptr128__))  */
+	    futex   (
+#  endif  /* (defined (__e2k__) && defined (__ptr128__))  */
+		     __addr, futex_wait_op, __val, &rt) == -1)
 	  {
 	    _GLIBCXX_DEBUG_ASSERT(errno == EINTR || errno == EAGAIN
 				  || errno == ETIMEDOUT);
@@ -90,7 +106,12 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     // This syscall can fail for various reasons, including in situations
     // in which there is no real error.  Thus, we don't bother checking
     // the error codes.  See the futex documentation and glibc for background.
-    syscall (SYS_futex, __addr, futex_wake_op, INT_MAX);
+#  if !(defined (__e2k__) && defined (__ptr128__))
+   syscall (SYS_futex,
+#  else /* (defined (__e2k__) && defined (__ptr128__))  */
+   futex   (
+#  endif  /* (defined (__e2k__) && defined (__ptr128__))  */
+	    __addr, futex_wake_op, INT_MAX);
   }
 
 _GLIBCXX_END_NAMESPACE_VERSION

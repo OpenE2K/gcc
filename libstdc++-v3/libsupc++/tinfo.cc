@@ -42,8 +42,12 @@ operator== (const std::type_info& arg) const _GLIBCXX_NOEXCEPT
   /* The name() method will strip any leading '*' prefix. Therefore
      take care to look at __name rather than name() when looking for
      the "pointer" prefix.  */
+#ifdef __LCC__
+  return (&arg == this) || (__builtin_strcmp (name (), arg.name ()) == 0);
+#else // __LCC__
   return (&arg == this)
     || (__name[0] != '*' && (__builtin_strcmp (name (), arg.name ()) == 0));
+#endif // __LCC__
 #endif
 }
 

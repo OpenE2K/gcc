@@ -121,7 +121,11 @@ align(size_t __align, size_t __size, void*& __ptr, size_t& __space) noexcept
   else
     {
       __space -= __diff;
+#if defined(__LCC__) && defined(__ptr128__)
+      return __ptr = __ptr + __diff;
+#else
       return __ptr = reinterpret_cast<void*>(__aligned);
+#endif
     }
 }
 

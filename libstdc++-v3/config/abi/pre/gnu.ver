@@ -1985,6 +1985,7 @@ CXXABI_1.3 {
     __cxa_begin_catch;
     __cxa_begin_cleanup;
     __cxa_call_unexpected;
+    __cxa_call_terminate;
     __cxa_current_exception_type;
     __cxa_demangle;
     __cxa_end_catch;

@@ -341,7 +341,11 @@ _GLIBCXX_END_NAMESPACE_VERSION
       // programs, because this_thread::get_id() != thread::id{} must be true.
       // We know that pthread_t is an integral type in the GNU C library.
       if (!__gthread_active_p())
+#if defined(__LCC__) && defined(__e2k__) && defined(__ptr128__)
+	return thread::id(reinterpret_cast<thread::native_handle_type>(1));
+#else // defined(__LCC__) && defined(__e2k__) && defined(__ptr128__)
 	return thread::id(1);
+#endif // defined(__LCC__) && defined(__e2k__) && defined(__ptr128__)
 #endif
       return thread::id(__gthread_self());
     }

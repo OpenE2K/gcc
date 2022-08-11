@@ -624,43 +624,155 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 
       __pointer_type
       operator++() noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old + 1;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_add_fetch(&_M_p, _M_type_size(1),
 				  memory_order_seq_cst); }
+#endif
 
       __pointer_type
       operator++() volatile noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old + 1;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_add_fetch(&_M_p, _M_type_size(1),
 				  memory_order_seq_cst); }
+#endif
 
       __pointer_type
       operator--() noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old - 1;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_sub_fetch(&_M_p, _M_type_size(1),
 				  memory_order_seq_cst); }
+#endif
 
       __pointer_type
       operator--() volatile noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old - 1;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_sub_fetch(&_M_p, _M_type_size(1),
 				  memory_order_seq_cst); }
+#endif
 
       __pointer_type
       operator+=(ptrdiff_t __d) noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old + __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_add_fetch(&_M_p, _M_type_size(__d),
 				  memory_order_seq_cst); }
+#endif
 
       __pointer_type
       operator+=(ptrdiff_t __d) volatile noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old + __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_add_fetch(&_M_p, _M_type_size(__d),
 				  memory_order_seq_cst); }
+#endif
 
       __pointer_type
       operator-=(ptrdiff_t __d) noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old - __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_sub_fetch(&_M_p, _M_type_size(__d),
 				  memory_order_seq_cst); }
+#endif
 
       __pointer_type
       operator-=(ptrdiff_t __d) volatile noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	memory_order const m = memory_order_seq_cst;
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(m);
+	    p_new = p_old - __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0, m, m));
+	return p_new;
+      }
+#else
       { return __atomic_sub_fetch(&_M_p, _M_type_size(__d),
 				  memory_order_seq_cst); }
+#endif
 
       bool
       is_lock_free() const noexcept
@@ -688,7 +800,11 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	__glibcxx_assert(__b != memory_order_acq_rel);
 	__glibcxx_assert(__b != memory_order_consume);
 
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	__atomic_store(&_M_p, &__p, __m);
+#else
 	__atomic_store_n(&_M_p, __p, __m);
+#endif
       }
 
       _GLIBCXX_ALWAYS_INLINE void
@@ -700,7 +816,11 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	__glibcxx_assert(__b != memory_order_acq_rel);
 	__glibcxx_assert(__b != memory_order_consume);
 
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	__atomic_store(&_M_p, &__p, __m);
+#else
 	__atomic_store_n(&_M_p, __p, __m);
+#endif
       }
 
       _GLIBCXX_ALWAYS_INLINE __pointer_type
@@ -710,7 +830,13 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	__glibcxx_assert(__b != memory_order_release);
 	__glibcxx_assert(__b != memory_order_acq_rel);
 
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	__pointer_type ret;
+	__atomic_load(&_M_p, &ret, __m);
+	return ret;
+#else
 	return __atomic_load_n(&_M_p, __m);
+#endif
       }
 
       _GLIBCXX_ALWAYS_INLINE __pointer_type
@@ -720,14 +846,26 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	__glibcxx_assert(__b != memory_order_release);
 	__glibcxx_assert(__b != memory_order_acq_rel);
 
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	__pointer_type ret;
+	__atomic_load(&_M_p, &ret, __m);
+	return ret;
+#else
 	return __atomic_load_n(&_M_p, __m);
+#endif
       }
 
       _GLIBCXX_ALWAYS_INLINE __pointer_type
       exchange(__pointer_type __p,
 	       memory_order __m = memory_order_seq_cst) noexcept
       {
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	__pointer_type ret;
+	__atomic_exchange(&_M_p, &__p, &ret, __m);
+	return ret;
+#else
 	return __atomic_exchange_n(&_M_p, __p, __m);
+#endif
       }
 
 
@@ -735,7 +873,13 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
       exchange(__pointer_type __p,
 	       memory_order __m = memory_order_seq_cst) volatile noexcept
       {
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	__pointer_type ret;
+	__atomic_exchange(&_M_p, &__p, &ret, __m);
+	return ret;
+#else
 	return __atomic_exchange_n(&_M_p, __p, __m);
+#endif
       }
 
       _GLIBCXX_ALWAYS_INLINE bool
@@ -749,7 +893,11 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	__glibcxx_assert(__b2 != memory_order_acq_rel);
 	__glibcxx_assert(__b2 <= __b1);
 
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	return __atomic_compare_exchange(&_M_p, &__p1, &__p2, 0, __m1, __m2);
+#else
 	return __atomic_compare_exchange_n(&_M_p, &__p1, __p2, 0, __m1, __m2);
+#endif
       }
 
       _GLIBCXX_ALWAYS_INLINE bool
@@ -764,28 +912,88 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	__glibcxx_assert(__b2 != memory_order_acq_rel);
 	__glibcxx_assert(__b2 <= __b1);
 
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+	return __atomic_compare_exchange(&_M_p, &__p1, &__p2, 0, __m1, __m2);
+#else
 	return __atomic_compare_exchange_n(&_M_p, &__p1, __p2, 0, __m1, __m2);
+#endif
       }
 
       _GLIBCXX_ALWAYS_INLINE __pointer_type
       fetch_add(ptrdiff_t __d,
 		memory_order __m = memory_order_seq_cst) noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(__m);
+	    p_new = p_old + __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0,
+					   __m, __m));
+	return p_old;
+      }
+#else
       { return __atomic_fetch_add(&_M_p, _M_type_size(__d), __m); }
+#endif
 
       _GLIBCXX_ALWAYS_INLINE __pointer_type
       fetch_add(ptrdiff_t __d,
 		memory_order __m = memory_order_seq_cst) volatile noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(__m);
+	    p_new = p_old + __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0,
+					   __m, __m));
+	return p_old;
+      }
+#else
       { return __atomic_fetch_add(&_M_p, _M_type_size(__d), __m); }
+#endif
 
       _GLIBCXX_ALWAYS_INLINE __pointer_type
       fetch_sub(ptrdiff_t __d,
 		memory_order __m = memory_order_seq_cst) noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(__m);
+	    p_new = p_old - __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0,
+					   __m, __m));
+	return p_old;
+      }
+#else
       { return __atomic_fetch_sub(&_M_p, _M_type_size(__d), __m); }
+#endif
 
       _GLIBCXX_ALWAYS_INLINE __pointer_type
       fetch_sub(ptrdiff_t __d,
 		memory_order __m = memory_order_seq_cst) volatile noexcept
+#if defined(__LCC__) && defined(__ptr128__) /* mcstbug #124127 */
+      {
+	__pointer_type p_new, p_old;
+	do
+	  {
+	    p_old = load(__m);
+	    p_new = p_old - __d;
+	  }
+	while (! __atomic_compare_exchange(&_M_p, &p_old, &p_new, 0,
+					   __m, __m));
+	return p_old;
+      }
+#else
       { return __atomic_fetch_sub(&_M_p, _M_type_size(__d), __m); }
+#endif
     };
 
   // @} group atomics

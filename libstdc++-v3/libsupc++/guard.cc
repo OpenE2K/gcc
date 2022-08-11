@@ -34,8 +34,12 @@
 #if defined(__GTHREADS) && defined(__GTHREAD_HAS_COND) \
   && (ATOMIC_INT_LOCK_FREE > 1) && defined(_GLIBCXX_HAVE_LINUX_FUTEX)
 # include <climits>
-# include <syscall.h>
-# include <unistd.h>
+# if ! (defined (__e2k__) && defined (__ptr128__))
+#  include <syscall.h>
+#  include <unistd.h>
+# else /* (defined (__e2k__) && defined (__ptr128__))  */
+#  include <e2k128/futex.h>
+# endif /* (defined (__e2k__) && defined (__ptr128__))  */
 # define _GLIBCXX_USE_FUTEX
 # define _GLIBCXX_FUTEX_WAIT 0
 # define _GLIBCXX_FUTEX_WAKE 1
@@ -298,8 +302,12 @@ namespace __cxxabiv1
 		 
 		 expected = newv;
 	       }
-
-	    syscall (SYS_futex, gi, _GLIBCXX_FUTEX_WAIT, expected, 0);
+#  if !(defined (__e2k__) && defined (__ptr128__))
+	    syscall (SYS_futex,
+#  else /* (defined (__e2k__) && defined (__ptr128__))  */
+	    futex   (
+#  endif  /* (defined (__e2k__) && defined (__ptr128__))  */
+		     gi, _GLIBCXX_FUTEX_WAIT, expected, 0);
 	  }
       }
 # else
@@ -358,7 +366,12 @@ namespace __cxxabiv1
 	int old = __atomic_exchange_n (gi, 0, __ATOMIC_ACQ_REL);
 
 	if ((old & waiting_bit) != 0)
-	  syscall (SYS_futex, gi, _GLIBCXX_FUTEX_WAKE, INT_MAX);
+#  if !(defined (__e2k__) && defined (__ptr128__))
+	    syscall (SYS_futex,
+#  else /* (defined (__e2k__) && defined (__ptr128__))  */
+	    futex   (
+#  endif  /* (defined (__e2k__) && defined (__ptr128__))  */
+		     gi, _GLIBCXX_FUTEX_WAKE, INT_MAX);
 	return;
       }
 #elif defined(__GTHREAD_HAS_COND)
@@ -398,7 +411,12 @@ namespace __cxxabiv1
 	int old = __atomic_exchange_n (gi, guard_bit, __ATOMIC_ACQ_REL);
 
 	if ((old & waiting_bit) != 0)
-	  syscall (SYS_futex, gi, _GLIBCXX_FUTEX_WAKE, INT_MAX);
+#  if !(defined (__e2k__) && defined (__ptr128__))
+	    syscall (SYS_futex,
+#  else /* (defined (__e2k__) && defined (__ptr128__))  */
+	    futex   (
+#  endif  /* (defined (__e2k__) && defined (__ptr128__))  */
+		     gi, _GLIBCXX_FUTEX_WAKE, INT_MAX);
 	return;
       }
 #elif defined(__GTHREAD_HAS_COND)

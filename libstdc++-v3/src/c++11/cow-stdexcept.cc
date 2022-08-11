@@ -273,6 +273,9 @@ _txnal_cow_string_C1_for_exceptions(void* that, const char* s,
 
 static void* txnal_read_ptr(void* const * ptr)
 {
+#if defined(__LCC__) && defined(__e2k__) && defined(__ptr128__)
+  __builtin_abort();
+#else // defined(__LCC__) && defined(__e2k__) && defined(__ptr128__)
   static_assert(sizeof(uint64_t) == sizeof(void*)
 		|| sizeof(uint32_t) == sizeof(void*)
 		|| sizeof(uint16_t) == sizeof(void*),
@@ -284,6 +287,7 @@ static void* txnal_read_ptr(void* const * ptr)
 #else
   return (void*)_ITM_RU2((const uint16_t*)ptr);
 #endif
+#endif // defined(__LCC__) && defined(__e2k__) && defined(__ptr128__)
 }
 
 // We must access the data pointer in the COW string transactionally because

@@ -797,8 +797,13 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
       size_t
       operator()(const unique_ptr<_Tp, _Dp>& __u) const noexcept
       {
+#if defined(__LCC__) && defined(__QNXNTO__) // _UP is a macro in QNX-libc
+	typedef unique_ptr<_Tp, _Dp> _Up;
+	return std::hash<typename _Up::pointer>()(__u.get());
+#else // defined(__LCC__) && defined(__QNXNTO__)
 	typedef unique_ptr<_Tp, _Dp> _UP;
 	return std::hash<typename _UP::pointer>()(__u.get());
+#endif // defined(__LCC__) && defined(__QNXNTO__)
       }
     };
 

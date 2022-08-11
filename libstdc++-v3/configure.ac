@@ -240,7 +240,7 @@ sys/resource.h sys/sem.h sys/stat.h sys/time.h sys/types.h unistd.h \
 wchar.h wctype.h])
 
 # Only do link tests if native. Else, hardcode.
-if $GLIBCXX_IS_NATIVE; then
+if $GLIBCXX_IS_NATIVE || true; then
 
   # We can do more elaborate tests that assume a working linker.
   CANADIAN=no
@@ -382,7 +382,7 @@ case "$target" in
   s390*-*-linux* | \
   alpha*-*-linux*)
   AC_TRY_COMPILE(, [
-#if !defined __LONG_DOUBLE_128__ || (defined(__sparc__) && defined(__arch64__))
+#if !defined __LONG_DOUBLE_128__ || (defined(__sparc__) && defined(__arch64__)) || defined __LCC__
 #error no need for long double compatibility
 #endif
   ], [ac_ldbl_compat=yes], [ac_ldbl_compat=no])
@@ -516,9 +516,9 @@ dnl In autoconf 2.5x, AC_OUTPUT is replaced by four AC_CONFIG_* macros,
 dnl which can all be called multiple times as needed, plus one (different)
 dnl AC_OUTPUT macro.  This one lists the files to be created:
 AC_CONFIG_FILES(Makefile)
-AC_CONFIG_FILES([scripts/testsuite_flags],[chmod +x scripts/testsuite_flags])
-AC_CONFIG_FILES([scripts/extract_symvers],[chmod +x scripts/extract_symvers])
-AC_CONFIG_FILES([doc/xsl/customization.xsl])
+#AC_CONFIG_FILES([scripts/testsuite_flags],[chmod +x scripts/testsuite_flags])
+#AC_CONFIG_FILES([scripts/extract_symvers],[chmod +x scripts/extract_symvers])
+#AC_CONFIG_FILES([doc/xsl/customization.xsl])
 
 # Multilibs need MULTISUBDIR defined correctly in certain makefiles so
 # that multilib installs will end up installed in the correct place.

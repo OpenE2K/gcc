@@ -49,7 +49,7 @@ AC_DEFUN([GLIBCXX_CONFIGURE], [
   # Keep these sync'd with the list in Makefile.am.  The first provides an
   # expandable list at autoconf time; the second provides an expandable list
   # (i.e., shell variable) at configure time.
-  m4_define([glibcxx_SUBDIRS],[include libsupc++ src src/c++98 src/c++11 src/filesystem doc po testsuite python])
+  m4_define([glibcxx_SUBDIRS],[include libsupc++ src src/c++98 src/c++11 src/filesystem])
   SUBDIRS='glibcxx_SUBDIRS'
 
   # These need to be absolute paths, yet at the same time need to
@@ -816,7 +816,7 @@ AC_DEFUN([GLIBCXX_EXPORT_INSTALL_INFO], [
       glibcxx_toolexecdir='${libdir}/gcc/${host_alias}'
       glibcxx_toolexeclibdir='${libdir}'
     fi
-    multi_os_directory=`$CXX -print-multi-os-directory`
+    multi_os_directory=.
     case $multi_os_directory in
       .) ;; # Avoid trailing /.
       *) glibcxx_toolexeclibdir=$glibcxx_toolexeclibdir/$multi_os_directory ;;

@@ -90,11 +90,20 @@ parse_lsda_header (_Unwind_Context *context, const unsigned char *p,
 static const std::type_info *
 get_ttype_entry (lsda_header_info *info, _uleb128_t i)
 {
+#if ! (defined (__e2k__) && defined (__ptr128__))
   _Unwind_Ptr ptr;
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  void *ptr;
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
 
   i *= size_of_encoded_value (info->ttype_encoding);
-  read_encoded_value_with_base (info->ttype_encoding, info->ttype_base,
-				info->TType - i, &ptr);
+#if ! (defined (__e2k__) && defined (__ptr128__))
+  read_encoded_value_with_base
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  read_encoded_ptr_with_base
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+    (info->ttype_encoding, info->ttype_base,
+     info->TType - i, &ptr);
 
   return reinterpret_cast<const std::type_info *>(ptr);
 }
@@ -709,8 +718,13 @@ PERSONALITY_FUNCTION (int version,
 
   /* For targets with pointers smaller than the word size, we must extend the
      pointer, and this extension is target dependent.  */
+#if ! (defined (__e2k__) && defined (__ptr128__))
   _Unwind_SetGR (context, __builtin_eh_return_data_regno (0),
 		 __builtin_extend_pointer (ue_header));
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+  _Unwind_SetGRPtr (context, __builtin_eh_return_data_regno (0), ue_header);
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
+		 
   _Unwind_SetGR (context, __builtin_eh_return_data_regno (1),
 		 handler_switch_value);
   _Unwind_SetIP (context, landing_pad);

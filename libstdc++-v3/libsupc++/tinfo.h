@@ -41,7 +41,11 @@ using namespace abi;
 struct vtable_prefix 
 {
   // Offset to most derived object.
+#if defined(__LCC__) && defined(__ptr128__) /* óÍ. bug #105841. */
+  int whole_object __attribute__((__mode__(__pointer__)));
+#else
   ptrdiff_t whole_object;
+#endif
 
   // Additional padding if necessary.
 #ifdef _GLIBCXX_VTABLE_PADDING

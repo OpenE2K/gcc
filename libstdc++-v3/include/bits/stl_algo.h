@@ -112,6 +112,19 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     __find_if(_RandomAccessIterator __first, _RandomAccessIterator __last,
 	      _Predicate __pred, random_access_iterator_tag)
     {
+#ifdef __LCC__
+      typename iterator_traits<_RandomAccessIterator>::difference_type
+        __trip_count = (__last - __first);
+
+#pragma loop count(9)
+      for (; __trip_count > 0; --__trip_count)
+      {
+          if (__pred(__first))
+              return __first;
+          ++__first;
+      }
+      return __first;
+#else // __LCC__
       typename iterator_traits<_RandomAccessIterator>::difference_type
 	__trip_count = (__last - __first) >> 2;
 
@@ -152,6 +165,7 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 	default:
 	  return __last;
 	}
+#endif // __LCC__
     }
 
   template<typename _Iterator, typename _Predicate>

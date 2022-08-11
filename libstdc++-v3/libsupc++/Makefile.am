@@ -41,7 +41,7 @@ headers = $(std_HEADERS) $(bits_HEADERS)
 
 if GLIBCXX_HOSTED
   c_sources = \
-	cp-demangle.c
+	cxa/decode.c
 endif
 
 sources = \
@@ -119,14 +119,22 @@ endif
 libsupc___la_SOURCES = $(sources) $(c_sources) $(vtv_sources)
 libsupc__convenience_la_SOURCES = $(sources) $(c_sources) $(vtv_sources)
 
-cp-demangle.c:
-	rm -f $@
-	$(LN_S) $(toplevel_srcdir)/libiberty/cp-demangle.c $@
-cp-demangle.lo: cp-demangle.c
-	$(LTCOMPILE) -DIN_GLIBCPP_V3 -Wno-error -c $<
-cp-demangle.o: cp-demangle.c
-	$(C_COMPILE) -DIN_GLIBCPP_V3 -Wno-error -c $<
+CXA_INCLUDES = -I$(srcdir)/cxa
+CXA_CFLAGS = -fbuilding-runtime -std=c++17 -fno-strict-aliasing -Wno-error
+CXA_DECODE_CFLAGS = \
+	-DCOMPILE_DECODE_FOR_LIB_SRC=1 \
+	-DDEFAULT_EMULATE_GNU_ABI_BUGS=1 \
+	-DUSE_LONG_DOUBLE_FOR_HOST_FP_VALUE=1
 
+decode.lo: cxa/decode.c
+	$(LTCXXCOMPILE) $(CXA_INCLUDES) $(CXA_CFLAGS) $(CXA_DECODE_CFLAGS) -c -xc++ $<
+decode.o: cxa/decode.c
+	$(CXXCOMPILE) $(CXA_INCLUDES) $(CXA_CFLAGS) $(CXA_DECODE_CFLAGS) -c -xc++ $<
+
+fundamental_type_info.lo: fundamental_type_info.cc
+	$(LTCXXCOMPILE) -fbuilding-runtime -std=gnu++14 -c $<
+fundamental_type_info.o: fundamental_type_info.cc
+	$(CXXCOMPILE) -fbuilding-runtime -std=gnu++14 -c $<
 
 # Use special rules for the C++11 sources so that the proper flags are passed.
 bad_array_length.lo: bad_array_length.cc

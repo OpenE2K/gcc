@@ -39,8 +39,10 @@
 #endif
 
 // Suppress deprecated warning for this file.
+#ifndef __LCC__ // suppress unrecognized pragma warning
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif // __LCC__
 
 namespace __gnu_cxx _GLIBCXX_VISIBILITY(default)
 {
@@ -177,6 +179,8 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
 _GLIBCXX_END_NAMESPACE_VERSION
 } // namespace
 
+#ifndef __LCC__ // suppress unrecognized pragma warning
 #pragma GCC diagnostic pop
+#endif // __LCC__
 
 #endif

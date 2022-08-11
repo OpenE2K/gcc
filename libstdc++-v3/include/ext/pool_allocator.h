@@ -79,7 +79,11 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     {
     protected:
 
+#if ! (defined (__e2k__) && defined (__ptr128__))
       enum { _S_align = 8 };
+#else /* defined (__e2k__) && defined (__ptr128__)  */
+      enum { _S_align = 16 };
+#endif /* defined (__e2k__) && defined (__ptr128__)  */
       enum { _S_max_bytes = 128 };
       enum { _S_free_list_size = (size_t)_S_max_bytes / (size_t)_S_align };
       
